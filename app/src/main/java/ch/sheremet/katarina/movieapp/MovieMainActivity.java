@@ -10,8 +10,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 import java.util.Scanner;
 
+import ch.sheremet.katarina.movieapp.model.Movie;
+import ch.sheremet.katarina.movieapp.utilities.MovieParseJsonUtil;
 import ch.sheremet.katarina.movieapp.utilities.NetworkUtil;
 
 public class MovieMainActivity extends AppCompatActivity {
@@ -25,17 +28,17 @@ public class MovieMainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_main);
         mTextView = findViewById(R.id.movieTV);
-        new ExtractMovieAsyncTask().execute(NetworkUtil.getTopRatedMovieUrl());
+        new ExtractMovieAsyncTask().execute(NetworkUtil.getPopularMovieUrl());
     }
 
 
-    // TODO: Implement Util class that get data from URL
-    class ExtractMovieAsyncTask extends AsyncTask<URL, Void, String> {
+    class ExtractMovieAsyncTask extends AsyncTask<URL, Void, List<Movie>> {
 
         @Override
-        protected String doInBackground(URL... url) {
+        protected List<Movie> doInBackground(URL... url) {
             try {
-                return NetworkUtil.getResponseFromHttpUrl(url[0]);
+                return MovieParseJsonUtil.getPopularMovies(
+                        NetworkUtil.getResponseFromHttpUrl(url[0]));
             } catch (IOException e) {
                 Log.e(TAG,"Getting data exception", e);
             }
@@ -43,9 +46,15 @@ public class MovieMainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            mTextView.setText(s);
+        protected void onPostExecute(List<Movie> movies) {
+            super.onPostExecute(movies);
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Movie movie: movies) {
+               stringBuilder.append(movie.toString());
+               stringBuilder.append("\n");
+            }
+            mTextView.setText(stringBuilder.toString());
+            Log.v(TAG, stringBuilder.toString());
         }
     }
 

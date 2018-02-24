@@ -28,10 +28,10 @@ public class MovieParseJsonUtil {
         try {
             JSONObject movieJson = new JSONObject(popularMoviesJson);
             if (movieJson.has(MOVIES_RESULTS_PARAM)) {
-                JSONArray resutlsJsonArray = movieJson.getJSONArray(MOVIES_RESULTS_PARAM);
-                List<Movie> movies = new ArrayList<>(resutlsJsonArray.length());
-                for (int i = 0; i< resutlsJsonArray.length(); i++) {
-                    JSONObject movieObj = resutlsJsonArray.getJSONObject(i);
+                JSONArray resultsJsonArray = movieJson.getJSONArray(MOVIES_RESULTS_PARAM);
+                List<Movie> movies = new ArrayList<>(resultsJsonArray.length());
+                for (int i = 0; i< resultsJsonArray.length(); i++) {
+                    JSONObject movieObj = resultsJsonArray.getJSONObject(i);
                     movies.add(parseMovieObjJson(movieObj));
                 }
                 return movies;

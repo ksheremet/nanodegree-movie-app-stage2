@@ -3,6 +3,9 @@ package ch.sheremet.katarina.movieapp;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -19,15 +22,20 @@ import ch.sheremet.katarina.movieapp.utilities.NetworkUtil;
 
 public class MovieMainActivity extends AppCompatActivity {
 
+    private static final int SPAN_COUNT = 2;
+
     private static final String TAG = MovieMainActivity.class.getSimpleName();
 
-    private TextView mTextView;
+    private RecyclerView mMoviesRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_main);
-        mTextView = findViewById(R.id.movieTV);
+        mMoviesRecyclerView = findViewById(R.id.movie_rv);
+        GridLayoutManager layoutManager = new GridLayoutManager(this, SPAN_COUNT);
+        mMoviesRecyclerView.setLayoutManager(layoutManager);
+        mMoviesRecyclerView.setHasFixedSize(true);
         new ExtractMovieAsyncTask().execute(NetworkUtil.getPopularMovieUrl());
     }
 
@@ -48,13 +56,7 @@ public class MovieMainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<Movie> movies) {
             super.onPostExecute(movies);
-            StringBuilder stringBuilder = new StringBuilder();
-            for (Movie movie: movies) {
-               stringBuilder.append(movie.toString());
-               stringBuilder.append("\n");
-            }
-            mTextView.setText(stringBuilder.toString());
-            Log.v(TAG, stringBuilder.toString());
+            mMoviesRecyclerView.setAdapter(new MovieAdapter(movies));
         }
     }
 

@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import java.io.IOException;
 import java.net.URL;
@@ -31,6 +33,7 @@ public class MovieMainActivity extends AppCompatActivity
     private static final String TAG = MovieMainActivity.class.getSimpleName();
 
     private RecyclerView mMoviesRecyclerView;
+    private MovieAdapter mMovieAdapter;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -40,15 +43,21 @@ public class MovieMainActivity extends AppCompatActivity
         GridLayoutManager layoutManager = new GridLayoutManager(this, SPAN_COUNT);
         mMoviesRecyclerView.setLayoutManager(layoutManager);
         mMoviesRecyclerView.setHasFixedSize(true);
+        mMovieAdapter = new MovieAdapter();
+        mMoviesRecyclerView.setAdapter(mMovieAdapter);
 
         getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
-        loadMoviesData();
+        loadMoviesData(POPULAR_MOVIES_PARAM);
     }
 
-    private void loadMoviesData() {
+    private void loadMoviesData(String movie_pref) {
         Bundle queryBundle = new Bundle();
-        queryBundle.putString(MOVIE_BUNDLE_PARAM, POPULAR_MOVIES_PARAM);
-
+        if (POPULAR_MOVIES_PARAM.equals(movie_pref)) {
+            queryBundle.putString(MOVIE_BUNDLE_PARAM, POPULAR_MOVIES_PARAM);
+        }
+        if (TOP_RATED_PARAM.equals(movie_pref)) {
+            queryBundle.putString(MOVIE_BUNDLE_PARAM, TOP_RATED_PARAM);
+        }
         LoaderManager loaderManager = getSupportLoaderManager();
         Loader<String> movieLoader = loaderManager.getLoader(MOVIE_LOADER_ID);
         if (movieLoader == null) {
@@ -67,7 +76,7 @@ public class MovieMainActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(final Loader<List<Movie>> loader, final List<Movie> data) {
-        mMoviesRecyclerView.setAdapter(new MovieAdapter(data));
+        mMovieAdapter.setMovies(data);
     }
 
     @Override
@@ -119,5 +128,25 @@ public class MovieMainActivity extends AppCompatActivity
             mMovieList = data;
             super.deliverResult(data);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.movie_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.popular_menu:
+                loadMoviesData(POPULAR_MOVIES_PARAM);
+                break;
+            case R.id.top_rated_menu:
+                loadMoviesData(TOP_RATED_PARAM);
+                break;
+            default: return super.onOptionsItemSelected(item);
+        }
+        return true;
     }
 }

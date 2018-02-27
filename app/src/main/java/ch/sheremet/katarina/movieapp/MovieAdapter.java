@@ -1,7 +1,6 @@
 package ch.sheremet.katarina.movieapp;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +13,14 @@ import java.util.List;
 import ch.sheremet.katarina.movieapp.model.Movie;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
-
-    private static final String TAG = MovieAdapter.class.getSimpleName();
     private List<Movie> mMovies;
 
-    public MovieAdapter(List<Movie> movies) {
+    public MovieAdapter() {
+    }
+
+    public void setMovies(List<Movie> movies) {
         this.mMovies = movies;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -31,7 +32,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
     @Override
     public void onBindViewHolder(MovieAdapterViewHolder holder, int position) {
-        Log.v(TAG, position + ":" + mMovies.get(position).getPoster());
         Picasso.with(holder.itemView.getContext())
                 .load(mMovies.get(position).getPoster())
                 .into(holder.mMoviePoster);
@@ -39,6 +39,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
     @Override
     public int getItemCount() {
+        if (mMovies == null) {
+            return 0;
+        }
         return mMovies.size();
     }
 
@@ -50,7 +53,5 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
             super(itemView);
             mMoviePoster = itemView.findViewById(R.id.movie_poster_iv);
         }
-
-
     }
 }

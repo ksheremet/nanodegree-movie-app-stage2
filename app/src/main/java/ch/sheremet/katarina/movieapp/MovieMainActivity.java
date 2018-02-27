@@ -21,7 +21,8 @@ import ch.sheremet.katarina.movieapp.utilities.MovieParseJsonUtil;
 import ch.sheremet.katarina.movieapp.utilities.NetworkUtil;
 
 public class MovieMainActivity extends AppCompatActivity
-        implements LoaderManager.LoaderCallbacks<List<Movie>> {
+        implements LoaderManager.LoaderCallbacks<List<Movie>>,
+        MovieAdapter.MovieAdapterOnClickHandler {
 
     private static final int SPAN_COUNT = 2;
 
@@ -43,7 +44,7 @@ public class MovieMainActivity extends AppCompatActivity
         GridLayoutManager layoutManager = new GridLayoutManager(this, SPAN_COUNT);
         mMoviesRecyclerView.setLayoutManager(layoutManager);
         mMoviesRecyclerView.setHasFixedSize(true);
-        mMovieAdapter = new MovieAdapter();
+        mMovieAdapter = new MovieAdapter(this);
         mMoviesRecyclerView.setAdapter(mMovieAdapter);
 
         getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
@@ -84,6 +85,32 @@ public class MovieMainActivity extends AppCompatActivity
 
     }
 
+    @Override
+    public void onClick(Movie movie) {
+        Log.v(TAG, movie.toString());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.movie_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.popular_menu:
+                loadMoviesData(POPULAR_MOVIES_PARAM);
+                break;
+            case R.id.top_rated_menu:
+                loadMoviesData(TOP_RATED_PARAM);
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
+
     public static class MovieListLoader extends AsyncTaskLoader<List<Movie>> {
         private final String mMovieSearchParam;
         private List<Movie> mMovieList;
@@ -118,7 +145,7 @@ public class MovieMainActivity extends AppCompatActivity
                 return MovieParseJsonUtil.getPopularMovies(
                         NetworkUtil.getResponseFromHttpUrl(url));
             } catch (IOException e) {
-                Log.e(TAG,"Getting data exception", e);
+                Log.e(TAG, "Getting data exception", e);
             }
             return null;
         }
@@ -128,25 +155,5 @@ public class MovieMainActivity extends AppCompatActivity
             mMovieList = data;
             super.deliverResult(data);
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.movie_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.popular_menu:
-                loadMoviesData(POPULAR_MOVIES_PARAM);
-                break;
-            case R.id.top_rated_menu:
-                loadMoviesData(TOP_RATED_PARAM);
-                break;
-            default: return super.onOptionsItemSelected(item);
-        }
-        return true;
     }
 }

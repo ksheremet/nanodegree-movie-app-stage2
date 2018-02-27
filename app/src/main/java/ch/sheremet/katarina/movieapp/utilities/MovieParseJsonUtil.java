@@ -30,7 +30,7 @@ public class MovieParseJsonUtil {
             if (movieJson.has(MOVIES_RESULTS_PARAM)) {
                 JSONArray resultsJsonArray = movieJson.getJSONArray(MOVIES_RESULTS_PARAM);
                 List<Movie> movies = new ArrayList<>(resultsJsonArray.length());
-                for (int i = 0; i< resultsJsonArray.length(); i++) {
+                for (int i = 0; i < resultsJsonArray.length(); i++) {
                     JSONObject movieObj = resultsJsonArray.getJSONObject(i);
                     movies.add(parseMovieObjJson(movieObj));
                 }

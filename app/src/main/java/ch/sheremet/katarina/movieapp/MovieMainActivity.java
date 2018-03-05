@@ -12,6 +12,9 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.io.IOException;
 import java.net.URL;
@@ -35,6 +38,10 @@ public class MovieMainActivity extends AppCompatActivity
     private static final String TAG = MovieMainActivity.class.getSimpleName();
     @BindView(R.id.movie_rv)
     RecyclerView mMoviesRecyclerView;
+    @BindView(R.id.error_message_tv)
+    TextView mErrorMessage;
+    @BindView(R.id.loading_movies_pb)
+    ProgressBar mLoadingMoviesIndicator;
     private MovieAdapter mMovieAdapter;
 
     @Override
@@ -61,6 +68,7 @@ public class MovieMainActivity extends AppCompatActivity
         if (TOP_RATED_PARAM.equals(movie_pref)) {
             queryBundle.putString(MOVIE_BUNDLE_PARAM, TOP_RATED_PARAM);
         }
+        showMoviesData();
         LoaderManager loaderManager = getSupportLoaderManager();
         Loader<String> movieLoader = loaderManager.getLoader(MOVIE_LOADER_ID);
         if (movieLoader == null) {
@@ -70,16 +78,31 @@ public class MovieMainActivity extends AppCompatActivity
         }
     }
 
+    private void showMoviesData() {
+        mErrorMessage.setVisibility(View.INVISIBLE);
+        mMoviesRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    private void showErrorMessage(String error) {
+        mMoviesRecyclerView.setVisibility(View.INVISIBLE);
+        mErrorMessage.setText(error);
+        mErrorMessage.setVisibility(View.VISIBLE);
+    }
 
     @NonNull
     @Override
     public Loader<List<Movie>> onCreateLoader(final int id, final Bundle args) {
+        mLoadingMoviesIndicator.setVisibility(View.VISIBLE);
         if (args == null) return new MovieListLoader(this, null);
         return new MovieListLoader(this, args.getString(MOVIE_BUNDLE_PARAM));
     }
 
     @Override
     public void onLoadFinished(@NonNull final Loader<List<Movie>> loader, final List<Movie> data) {
+        mLoadingMoviesIndicator.setVisibility(View.INVISIBLE);
+        if (data == null) {
+            showErrorMessage(getString(R.string.error_occurred_error_message));
+        }
         mMovieAdapter.setMovies(data);
     }
 
@@ -132,7 +155,6 @@ public class MovieMainActivity extends AppCompatActivity
                 forceLoad();
             } else {
                 deliverResult(mMovieList);
-
             }
         }
 

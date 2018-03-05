@@ -21,7 +21,7 @@ public class MovieParseJsonUtil {
     private static final String ORIGINAL_TITLE_PARAM = "original_title";
     private static final String POSTER_PATH_PARAM = "poster_path";
     private static final String PLOT_SYNOPSIS_PARAM = "overview";
-    private static final String USER_RAITING_PARAM = "vote_average";
+    private static final String USER_RATING_PARAM = "vote_average";
     private static final String RELEASE_DATE_PARAM = "release_date";
 
     public static List<Movie> getPopularMovies(String popularMoviesJson) {
@@ -56,8 +56,8 @@ public class MovieParseJsonUtil {
         if (movieObj.has(PLOT_SYNOPSIS_PARAM)) {
             movie.setPlotSynopsis(movieObj.getString(PLOT_SYNOPSIS_PARAM));
         }
-        if (movieObj.has(USER_RAITING_PARAM)) {
-            movie.setUserRating(movieObj.getString(USER_RAITING_PARAM));
+        if (movieObj.has(USER_RATING_PARAM)) {
+            movie.setUserRating(movieObj.getString(USER_RATING_PARAM));
         }
         if (movieObj.has(RELEASE_DATE_PARAM)) {
             movie.setReleaseDate(movieObj.getString(RELEASE_DATE_PARAM));

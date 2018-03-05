@@ -28,15 +28,11 @@ public class MovieMainActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<List<Movie>>,
         MovieAdapter.MovieAdapterOnClickHandler {
 
-    private static final int SPAN_COUNT = 2;
-
     private static final int MOVIE_LOADER_ID = 148;
     private static final String MOVIE_BUNDLE_PARAM = "movies";
     private static final String POPULAR_MOVIES_PARAM = "popular";
     private static final String TOP_RATED_PARAM = "top-rated";
-
     private static final String TAG = MovieMainActivity.class.getSimpleName();
-
     @BindView(R.id.movie_rv)
     RecyclerView mMoviesRecyclerView;
     private MovieAdapter mMovieAdapter;
@@ -46,7 +42,8 @@ public class MovieMainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_main);
         ButterKnife.bind(this);
-        GridLayoutManager layoutManager = new GridLayoutManager(this, SPAN_COUNT);
+        int spanCount = getResources().getInteger(R.integer.grid_span_count);
+        GridLayoutManager layoutManager = new GridLayoutManager(this, spanCount);
         mMoviesRecyclerView.setLayoutManager(layoutManager);
         mMoviesRecyclerView.setHasFixedSize(true);
         mMovieAdapter = new MovieAdapter(this);

@@ -17,6 +17,7 @@ import java.net.URL;
 import java.util.List;
 
 import ch.sheremet.katarina.movieapp.model.Movie;
+import ch.sheremet.katarina.movieapp.moviedetail.MovieDetailActivity;
 import ch.sheremet.katarina.movieapp.utilities.MovieParseJsonUtil;
 import ch.sheremet.katarina.movieapp.utilities.NetworkUtil;
 
@@ -87,7 +88,7 @@ public class MovieMainActivity extends AppCompatActivity
 
     @Override
     public void onClick(Movie movie) {
-        Log.v(TAG, movie.toString());
+        MovieDetailActivity.start(this, movie);
     }
 
     @Override

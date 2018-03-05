@@ -1,9 +1,23 @@
 package ch.sheremet.katarina.movieapp.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Model class for movie.
  */
-public class Movie {
+public class Movie implements Parcelable {
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
     private int mId;
     private String mOriginalTitle;
     private String mPlotSynopsis;
@@ -14,14 +28,13 @@ public class Movie {
     public Movie() {
     }
 
-    public Movie(int mId, String mOriginalTitle, String mPlotSynopsis, String mUserRating,
-                 String mReleaseDate, String mPoster) {
-        this.mId = mId;
-        this.mOriginalTitle = mOriginalTitle;
-        this.mPlotSynopsis = mPlotSynopsis;
-        this.mUserRating = mUserRating;
-        this.mReleaseDate = mReleaseDate;
-        this.mPoster = mPoster;
+    private Movie(Parcel in) {
+        mId = in.readInt();
+        mOriginalTitle = in.readString();
+        mPlotSynopsis = in.readString();
+        mUserRating = in.readString();
+        mReleaseDate = in.readString();
+        mPoster = in.readString();
     }
 
     public int getId() {
@@ -73,14 +86,17 @@ public class Movie {
     }
 
     @Override
-    public String toString() {
-        return "Movie{" +
-                "mId=" + mId +
-                ", mOriginalTitle='" + mOriginalTitle + '\'' +
-                ", mPlotSynopsis='" + mPlotSynopsis + '\'' +
-                ", mUserRating='" + mUserRating + '\'' +
-                ", mReleaseDate='" + mReleaseDate + '\'' +
-                ", mPoster='" + mPoster + '\'' +
-                '}';
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(mId);
+        parcel.writeString(mOriginalTitle);
+        parcel.writeString(mPlotSynopsis);
+        parcel.writeString(mUserRating);
+        parcel.writeString(mReleaseDate);
+        parcel.writeString(mPoster);
     }
 }

@@ -2,4 +2,6 @@
     <string name="app_name">MovieApp</string>
     <string name="popular_movies_menu_item">Most Popular</string>
     <string name="top_rated_movies_menu_item">Top Rated</string>
+    <string name="release_detail_tv">Release Date: %1$s</string>
+    <string name="rating_detail_tv">Rating: %1$s/10</string>
 </resources>

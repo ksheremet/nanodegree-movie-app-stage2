@@ -2,6 +2,7 @@ package ch.sheremet.katarina.movieapp;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -16,6 +17,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import ch.sheremet.katarina.movieapp.model.Movie;
 import ch.sheremet.katarina.movieapp.moviedetail.MovieDetailActivity;
 import ch.sheremet.katarina.movieapp.utilities.MovieParseJsonUtil;
@@ -34,14 +37,15 @@ public class MovieMainActivity extends AppCompatActivity
 
     private static final String TAG = MovieMainActivity.class.getSimpleName();
 
-    private RecyclerView mMoviesRecyclerView;
+    @BindView(R.id.movie_rv)
+    RecyclerView mMoviesRecyclerView;
     private MovieAdapter mMovieAdapter;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_main);
-        mMoviesRecyclerView = findViewById(R.id.movie_rv);
+        ButterKnife.bind(this);
         GridLayoutManager layoutManager = new GridLayoutManager(this, SPAN_COUNT);
         mMoviesRecyclerView.setLayoutManager(layoutManager);
         mMoviesRecyclerView.setHasFixedSize(true);
@@ -70,6 +74,7 @@ public class MovieMainActivity extends AppCompatActivity
     }
 
 
+    @NonNull
     @Override
     public Loader<List<Movie>> onCreateLoader(final int id, final Bundle args) {
         if (args == null) return new MovieListLoader(this, null);
@@ -77,12 +82,12 @@ public class MovieMainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onLoadFinished(final Loader<List<Movie>> loader, final List<Movie> data) {
+    public void onLoadFinished(@NonNull final Loader<List<Movie>> loader, final List<Movie> data) {
         mMovieAdapter.setMovies(data);
     }
 
     @Override
-    public void onLoaderReset(final Loader<List<Movie>> loader) {
+    public void onLoaderReset(@NonNull final Loader<List<Movie>> loader) {
 
     }
 

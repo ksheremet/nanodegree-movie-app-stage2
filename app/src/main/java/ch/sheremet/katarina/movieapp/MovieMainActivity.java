@@ -1,6 +1,7 @@
 package ch.sheremet.katarina.movieapp;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
@@ -33,8 +34,6 @@ public class MovieMainActivity extends AppCompatActivity
 
     private static final int MOVIE_LOADER_ID = 148;
     private static final String MOVIE_BUNDLE_PARAM = "movies";
-    private static final String POPULAR_MOVIES_PARAM = "popular";
-    private static final String TOP_RATED_PARAM = "top-rated";
     private static final String TAG = MovieMainActivity.class.getSimpleName();
     @BindView(R.id.movie_rv)
     RecyclerView mMoviesRecyclerView;
@@ -43,6 +42,7 @@ public class MovieMainActivity extends AppCompatActivity
     @BindView(R.id.loading_movies_pb)
     ProgressBar mLoadingMoviesIndicator;
     private MovieAdapter mMovieAdapter;
+    private SharedPreferences mMoviePref;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -56,17 +56,19 @@ public class MovieMainActivity extends AppCompatActivity
         mMovieAdapter = new MovieAdapter(this);
         mMoviesRecyclerView.setAdapter(mMovieAdapter);
 
+        mMoviePref = getPreferences(Context.MODE_PRIVATE);
         getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
-        loadMoviesData(POPULAR_MOVIES_PARAM);
+        String movie_pref = mMoviePref.getString(getString(R.string.movie_pref_key),
+                getString(R.string.popular_movies_pref));
+        loadMoviesData(movie_pref);
     }
 
     private void loadMoviesData(String movie_pref) {
         Bundle queryBundle = new Bundle();
-        if (POPULAR_MOVIES_PARAM.equals(movie_pref)) {
-            queryBundle.putString(MOVIE_BUNDLE_PARAM, POPULAR_MOVIES_PARAM);
-        }
-        if (TOP_RATED_PARAM.equals(movie_pref)) {
-            queryBundle.putString(MOVIE_BUNDLE_PARAM, TOP_RATED_PARAM);
+        if (movie_pref.equals(getString(R.string.top_rated_movies_pref))) {
+            queryBundle.putString(MOVIE_BUNDLE_PARAM, getString(R.string.top_rated_movies_pref));
+        } else {
+            queryBundle.putString(MOVIE_BUNDLE_PARAM, getString(R.string.popular_movies_pref));
         }
         showMoviesData();
         LoaderManager loaderManager = getSupportLoaderManager();
@@ -122,14 +124,23 @@ public class MovieMainActivity extends AppCompatActivity
         return true;
     }
 
+    private void saveUserPref(String pref) {
+        SharedPreferences.Editor editor = mMoviePref.edit();
+        editor.putString(getString(R.string.movie_pref_key), pref);
+        // handle in background
+        editor.apply();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.popular_menu:
-                loadMoviesData(POPULAR_MOVIES_PARAM);
+                saveUserPref(getString(R.string.popular_movies_pref));
+                loadMoviesData(getString(R.string.popular_movies_pref));
                 break;
             case R.id.top_rated_menu:
-                loadMoviesData(TOP_RATED_PARAM);
+                saveUserPref(getString(R.string.top_rated_movies_pref));
+                loadMoviesData(getString(R.string.top_rated_movies_pref));
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -162,7 +173,7 @@ public class MovieMainActivity extends AppCompatActivity
         public List<Movie> loadInBackground() {
             try {
                 URL url;
-                if (mMovieSearchParam.equals(POPULAR_MOVIES_PARAM)) {
+                if (mMovieSearchParam.equals(getContext().getString(R.string.popular_movies_pref))) {
                     url = NetworkUtil.getPopularMovieUrl();
                 } else {
                     url = NetworkUtil.getTopRatedMovieUrl();

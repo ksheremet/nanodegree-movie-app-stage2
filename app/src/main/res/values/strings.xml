@@ -5,4 +5,8 @@
     <string name="release_detail_tv">Release Date: %1$s</string>
     <string name="rating_detail_tv">Rating: %1$s/10</string>
     <string name="error_occurred_error_message">Error occurred. Try it later</string>
+
+    <string name="movie_pref_key" translatable="false">movie_pref_key</string>
+    <string name="popular_movies_pref" translatable="false">popular</string>
+    <string name="top_rated_movies_pref" translatable="false">top-rated</string>
 </resources>

@@ -138,10 +138,9 @@ public class MovieMainActivity extends AppCompatActivity
         return true;
     }
 
-    private void saveUserPref(String pref) {
+    private void saveMoviesUserPref(String pref) {
         SharedPreferences.Editor editor = mMoviePref.edit();
         editor.putString(getString(R.string.movie_pref_key), pref);
-        // handle in background
         editor.apply();
     }
 
@@ -149,11 +148,11 @@ public class MovieMainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.popular_menu:
-                saveUserPref(getString(R.string.popular_movies_pref));
+                saveMoviesUserPref(getString(R.string.popular_movies_pref));
                 loadMoviesData(getString(R.string.popular_movies_pref));
                 break;
             case R.id.top_rated_menu:
-                saveUserPref(getString(R.string.top_rated_movies_pref));
+                saveMoviesUserPref(getString(R.string.top_rated_movies_pref));
                 loadMoviesData(getString(R.string.top_rated_movies_pref));
                 break;
             default:

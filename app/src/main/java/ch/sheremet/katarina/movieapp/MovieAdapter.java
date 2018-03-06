@@ -1,6 +1,5 @@
 package ch.sheremet.katarina.movieapp;
 
-import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,7 +26,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     }
 
     @Override
-    public MovieAdapterViewHolder onCreateViewHolder(@NonNull final ViewGroup parent,
+    public MovieAdapterViewHolder onCreateViewHolder(final ViewGroup parent,
                                                      final int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.movie_item, parent, false);

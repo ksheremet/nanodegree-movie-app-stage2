@@ -2,6 +2,8 @@ package ch.sheremet.katarina.movieapp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
@@ -63,7 +65,19 @@ public class MovieMainActivity extends AppCompatActivity
         loadMoviesData(movie_pref);
     }
 
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm == null) return false;
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
     private void loadMoviesData(String movie_pref) {
+        if (!isOnline()) {
+            showErrorMessage(getString(R.string.offline_user_message));
+            return;
+        }
         Bundle queryBundle = new Bundle();
         if (movie_pref.equals(getString(R.string.top_rated_movies_pref))) {
             queryBundle.putString(MOVIE_BUNDLE_PARAM, getString(R.string.top_rated_movies_pref));

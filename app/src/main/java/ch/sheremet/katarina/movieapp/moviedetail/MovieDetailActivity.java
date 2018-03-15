@@ -51,7 +51,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         setTitle(movie.getOriginalTitle());
-        Picasso.with(this)
+        Picasso.get()
                 .load(movie.getPoster())
                 .into(mPosterIV);
         mPosterIV.setContentDescription(movie.getPlotSynopsis());

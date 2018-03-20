@@ -19,16 +19,16 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ch.sheremet.katarina.movieapp.model.Movie;
+import ch.sheremet.katarina.movieapp.model.MoviesResponse;
 import ch.sheremet.katarina.movieapp.moviedetail.MovieDetailActivity;
-import ch.sheremet.katarina.movieapp.utilities.MovieParseJsonUtil;
-import ch.sheremet.katarina.movieapp.utilities.NetworkUtil;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MovieMainActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<List<Movie>>,
@@ -45,6 +45,7 @@ public class MovieMainActivity extends AppCompatActivity
     ProgressBar mLoadingMoviesIndicator;
     private MovieAdapter mMovieAdapter;
     private SharedPreferences mMoviePref;
+    private Callback<MoviesResponse> mMoviesCallback;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -62,6 +63,25 @@ public class MovieMainActivity extends AppCompatActivity
         getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
         String movie_pref = mMoviePref.getString(getString(R.string.movie_pref_key),
                 getString(R.string.popular_movies_pref));
+        mMoviesCallback = new Callback<MoviesResponse>() {
+            @Override
+            public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
+                if (response.isSuccessful()) {
+                    mLoadingMoviesIndicator.setVisibility(View.INVISIBLE);
+                    mMovieAdapter.setMovies(response.body().getMovies());
+                } else {
+                    showErrorMessage(getString(R.string.error_occurred_error_message));
+                    Log.e(TAG, response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MoviesResponse> call, Throwable t) {
+                showErrorMessage(getString(R.string.error_occurred_error_message));
+                Log.e(TAG, "Error getting movies", t);
+            }
+        };
+
         loadMoviesData(movie_pref);
     }
 
@@ -81,17 +101,22 @@ public class MovieMainActivity extends AppCompatActivity
         Bundle queryBundle = new Bundle();
         if (movie_pref.equals(getString(R.string.top_rated_movies_pref))) {
             queryBundle.putString(MOVIE_BUNDLE_PARAM, getString(R.string.top_rated_movies_pref));
+            MovieMainApplication.apiManager.getTopRatedMovies(mMoviesCallback);
+
         } else {
             queryBundle.putString(MOVIE_BUNDLE_PARAM, getString(R.string.popular_movies_pref));
+            MovieMainApplication.apiManager.getPopularMovies(mMoviesCallback);
+
         }
         showMoviesData();
-        LoaderManager loaderManager = getSupportLoaderManager();
+        // TODO: To be implemented for Content Provider
+        /*LoaderManager loaderManager = getSupportLoaderManager();
         Loader<String> movieLoader = loaderManager.getLoader(MOVIE_LOADER_ID);
         if (movieLoader == null) {
             loaderManager.initLoader(MOVIE_LOADER_ID, queryBundle, this);
         } else {
             loaderManager.restartLoader(MOVIE_LOADER_ID, queryBundle, this);
-        }
+        }*/
     }
 
     private void showMoviesData() {
@@ -184,18 +209,6 @@ public class MovieMainActivity extends AppCompatActivity
 
         @Override
         public List<Movie> loadInBackground() {
-            try {
-                URL url;
-                if (mMovieSearchParam.equals(getContext().getString(R.string.popular_movies_pref))) {
-                    url = NetworkUtil.getPopularMovieUrl();
-                } else {
-                    url = NetworkUtil.getTopRatedMovieUrl();
-                }
-                return MovieParseJsonUtil.getPopularMovies(
-                        NetworkUtil.getResponseFromHttpUrl(url));
-            } catch (IOException e) {
-                Log.e(TAG, "Getting data exception", e);
-            }
             return null;
         }
 

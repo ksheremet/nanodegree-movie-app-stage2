@@ -3,6 +3,8 @@ package ch.sheremet.katarina.movieapp.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Model class for movie.
  */
@@ -18,11 +20,17 @@ public class Movie implements Parcelable {
             return new Movie[size];
         }
     };
+    @SerializedName("id")
     private int mId;
+    @SerializedName("original_title")
     private String mOriginalTitle;
+    @SerializedName("overview")
     private String mPlotSynopsis;
+    @SerializedName("vote_average")
     private String mUserRating;
+    @SerializedName("release_date")
     private String mReleaseDate;
+    @SerializedName("poster_path")
     private String mPoster;
 
     public Movie() {
@@ -98,5 +106,17 @@ public class Movie implements Parcelable {
         parcel.writeString(mUserRating);
         parcel.writeString(mReleaseDate);
         parcel.writeString(mPoster);
+    }
+
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "mId=" + mId +
+                ", mOriginalTitle='" + mOriginalTitle + '\'' +
+                ", mPlotSynopsis='" + mPlotSynopsis + '\'' +
+                ", mUserRating='" + mUserRating + '\'' +
+                ", mReleaseDate='" + mReleaseDate + '\'' +
+                ", mPoster='" + mPoster + '\'' +
+                '}';
     }
 }

@@ -15,6 +15,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import ch.sheremet.katarina.movieapp.R;
 import ch.sheremet.katarina.movieapp.model.Movie;
+import ch.sheremet.katarina.movieapp.utilities.MoviePosterUtil;
 
 public class MovieDetailActivity extends AppCompatActivity {
 
@@ -52,7 +53,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         }
         setTitle(movie.getOriginalTitle());
         Picasso.get()
-                .load(movie.getPoster())
+                .load(MoviePosterUtil.buildPosterUrl(movie.getPoster()))
                 .into(mPosterIV);
         mPosterIV.setContentDescription(movie.getPlotSynopsis());
         mTitleTV.setText(movie.getOriginalTitle());

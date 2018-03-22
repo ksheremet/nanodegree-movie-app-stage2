@@ -16,13 +16,11 @@
         <ImageView
             android:id="@+id/detail_movie_poster_iv"
             android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:adjustViewBounds="true"
-            android:scaleType="centerCrop"
+            android:layout_height="150dp"
+            style="@style/BasicImageStyle.DetailPosterStyle"
             android:src="@drawable/movie"
-            app:layout_constraintDimensionRatio="3:2"
+            app:layout_constraintDimensionRatio="3:4"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -30,24 +28,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/border_indent"
-            android:layout_marginLeft="@dimen/border_indent"
             android:layout_marginTop="@dimen/items_indent"
             android:textAppearance="@style/TextAppearance.AppCompat.Headline"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/detail_movie_poster_iv"
+            app:layout_constraintStart_toEndOf="@+id/detail_movie_poster_iv"
+            app:layout_constraintTop_toTopOf="parent"
             tools:text="The Maze Runner" />
 
         <TextView
             android:id="@+id/detail_plot_summary_tv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/items_indent"
+            android:layout_marginEnd="@dimen/border_indent"
+            android:layout_marginStart="@dimen/border_indent"
+            android:layout_marginTop="16dp"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/detail_rating_tv"
-            app:layout_constraintTop_toBottomOf="@+id/detail_rating_tv"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/detail_movie_poster_iv"
             tools:text="Set in a post-apocalyptic world" />
 
         <TextView
@@ -65,13 +64,27 @@
             android:id="@+id/detail_release_date_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/border_indent"
-            android:layout_marginTop="@dimen/items_indent"
+            android:layout_marginTop="16dp"
             android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/detail_plot_summary_tv"
-            app:layout_constraintTop_toBottomOf="@+id/detail_plot_summary_tv"
+            app:layout_constraintStart_toStartOf="@+id/detail_rating_tv"
+            app:layout_constraintTop_toBottomOf="@+id/detail_rating_tv"
             tools:text="Release Date: 2014-09-10" />
+
+        <!-- TODO(ksheremer): Add error message and progress bar -->
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/trailers_rv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:scrollbars="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/detail_plot_summary_tv" />
+
     </android.support.constraint.ConstraintLayout>
+
+
 
 </ScrollView>

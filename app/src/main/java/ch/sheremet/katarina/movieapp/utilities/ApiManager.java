@@ -1,9 +1,8 @@
 package ch.sheremet.katarina.movieapp.utilities;
 
-import java.io.IOException;
-
 import ch.sheremet.katarina.movieapp.BuildConfig;
 import ch.sheremet.katarina.movieapp.model.MoviesResponse;
+import ch.sheremet.katarina.movieapp.model.TrailersResponse;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -18,6 +17,7 @@ public class ApiManager {
     public static final String BASE_URL = "http://api.themoviedb.org/3/";
     private static final String MOVIE_POPULAR_PATH = "popular";
     private static final String MOVIE_TOP_RATED_PATH = "top_rated";
+    private static final String API_KEY = BuildConfig.API_KEY;
 
     private ApiManager() {
         // For logging
@@ -42,14 +42,19 @@ public class ApiManager {
         return apiManager;
     }
 
-    public void getPopularMovies(Callback<MoviesResponse> callback) {
-        Call<MoviesResponse> popularMoviesCall = service.getMovies(MOVIE_POPULAR_PATH, BuildConfig.API_KEY);
+    public void getPopularMovies(final Callback<MoviesResponse> callback) {
+        Call<MoviesResponse> popularMoviesCall = service.getMovies(MOVIE_POPULAR_PATH, API_KEY);
         popularMoviesCall.enqueue(callback);
 
     }
 
-    public void getTopRatedMovies(Callback<MoviesResponse> callback) {
-        Call<MoviesResponse> topRatedMoviesCall = service.getMovies(MOVIE_TOP_RATED_PATH, BuildConfig.API_KEY);
+    public void getTopRatedMovies(final Callback<MoviesResponse> callback) {
+        Call<MoviesResponse> topRatedMoviesCall = service.getMovies(MOVIE_TOP_RATED_PATH, API_KEY);
         topRatedMoviesCall.enqueue(callback);
+    }
+
+    public void getMovieTrailers(final Callback<TrailersResponse> callback, final int movieId) {
+        Call<TrailersResponse> trailersCall = service.getTrailers(movieId, API_KEY);
+        trailersCall.enqueue(callback);
     }
 }

@@ -2,4 +2,9 @@
 <resources>
     <dimen name="border_indent">8dp</dimen>
     <dimen name="items_indent">16dp</dimen>
+
+    <!-- Trailers -->
+    <dimen name="trailer_image_height">120dp</dimen>
+    <dimen name="trailer_image_width">180dp</dimen>
+    <dimen name="trailer_image_margin">4dp</dimen>
 </resources>

@@ -11,7 +11,7 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import ch.sheremet.katarina.movieapp.model.Movie;
-import ch.sheremet.katarina.movieapp.utilities.MoviePosterUtil;
+import ch.sheremet.katarina.movieapp.utilities.UriUtil;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
     private final MovieAdapterOnClickHandler mMovieOnClickHandler;
@@ -38,7 +38,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     public void onBindViewHolder(final MovieAdapterViewHolder holder,
                                  final int position) {
         Picasso.get()
-                .load(MoviePosterUtil.buildPosterUrl(mMovies.get(position).getPoster()))
+                .load(UriUtil.buildPosterUrl(mMovies.get(position).getPoster()))
                 .into(holder.mMoviePoster);
     }
 

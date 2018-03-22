@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/trailer_name_tv"
+        style="@style/ItemMarginBordersStyle"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="@+id/trailer_poster_iv"
+        app:layout_constraintStart_toStartOf="@+id/trailer_poster_iv"
+        app:layout_constraintTop_toBottomOf="@+id/trailer_poster_iv"
+        tools:text="Trailer Name" />
+
+    <ImageView
+        android:id="@+id/trailer_poster_iv"
+        style="@style/ImageStyle.TrailersStyle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/movie" />
+
+</android.support.constraint.ConstraintLayout>

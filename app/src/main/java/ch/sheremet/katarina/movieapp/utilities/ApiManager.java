@@ -2,6 +2,7 @@ package ch.sheremet.katarina.movieapp.utilities;
 
 import ch.sheremet.katarina.movieapp.BuildConfig;
 import ch.sheremet.katarina.movieapp.model.MoviesResponse;
+import ch.sheremet.katarina.movieapp.model.ReviewsResponse;
 import ch.sheremet.katarina.movieapp.model.TrailersResponse;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -56,5 +57,10 @@ public class ApiManager {
     public void getMovieTrailers(final Callback<TrailersResponse> callback, final int movieId) {
         Call<TrailersResponse> trailersCall = service.getTrailers(movieId, API_KEY);
         trailersCall.enqueue(callback);
+    }
+
+    public void getMovieReviews(final Callback<ReviewsResponse> callback, final int movieId) {
+        Call<ReviewsResponse> reviewsCall = service.getReviews(movieId, API_KEY);
+        reviewsCall.enqueue(callback);
     }
 }

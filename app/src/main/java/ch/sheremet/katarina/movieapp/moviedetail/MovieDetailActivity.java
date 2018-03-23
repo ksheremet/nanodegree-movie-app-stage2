@@ -20,17 +20,23 @@ import butterknife.ButterKnife;
 import ch.sheremet.katarina.movieapp.MovieMainApplication;
 import ch.sheremet.katarina.movieapp.R;
 import ch.sheremet.katarina.movieapp.model.Movie;
+import ch.sheremet.katarina.movieapp.model.Review;
+import ch.sheremet.katarina.movieapp.model.ReviewsResponse;
 import ch.sheremet.katarina.movieapp.model.Trailer;
 import ch.sheremet.katarina.movieapp.model.TrailersResponse;
+import ch.sheremet.katarina.movieapp.reviewdetail.ReviewDetailFragment;
 import ch.sheremet.katarina.movieapp.utilities.UriUtil;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MovieDetailActivity extends AppCompatActivity implements TrailerAdapter.TrailerAdapterOnClickHandler {
+public class MovieDetailActivity extends AppCompatActivity
+        implements TrailerAdapter.TrailerAdapterOnClickHandler,
+        ReviewAdapter.ReviewAdapterOnClickHandler {
 
     private static final String TAG = MovieDetailActivity.class.getSimpleName();
     private static final String MOVIE_PARAM = "movie";
+    private static final String REVIEW_FRAGMENT_TAG = "review_detail";
 
     @BindView(R.id.detail_movie_poster_iv)
     ImageView mPosterIV;
@@ -44,8 +50,11 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
     TextView mReleaseDateTV;
     @BindView(R.id.trailers_rv)
     RecyclerView mTrailersRecyclerView;
+    @BindView(R.id.reviews_rv)
+    RecyclerView mReviewsRecyclerView;
 
     private TrailerAdapter mTrailersAdapter;
+    private ReviewAdapter mReviewsAdapter;
     private Movie mMovie;
 
     public static void start(final Context context, final Movie movie) {
@@ -77,6 +86,7 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         mRatingTV.setText(getString(R.string.rating_detail_tv, mMovie.getUserRating()));
         mReleaseDateTV.setText(getString(R.string.release_detail_tv, mMovie.getReleaseDate()));
         setTrailersView();
+        setReviewsView();
     }
 
     private void setTrailersView() {
@@ -106,6 +116,34 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         }, mMovie.getId());
     }
 
+    private void setReviewsView() {
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
+                LinearLayoutManager.VERTICAL,false);
+        mReviewsRecyclerView.setLayoutManager(linearLayoutManager);
+        mReviewsAdapter = new ReviewAdapter(this);
+        mReviewsRecyclerView.setAdapter(mReviewsAdapter);
+
+
+        // TODO: implement this in Presenter
+        MovieMainApplication.apiManager.getMovieReviews(new Callback<ReviewsResponse>() {
+            @Override
+            public void onResponse(final Call<ReviewsResponse> call,
+                                   final Response<ReviewsResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Log.d(TAG, response.body().getReviews().toString());
+                    mReviewsAdapter.setReviews(response.body().getReviews());
+                } else {
+                    Log.e(TAG, response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReviewsResponse> call, Throwable t) {
+                Log.e(TAG, "Error fetching trailers", t);
+            }
+        }, mMovie.getId());
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -116,8 +154,14 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
     }
 
     @Override
-    public void onClick(Trailer trailer) {
+    public void onTrailerClick(Trailer trailer) {
         startActivity(new Intent(Intent.ACTION_VIEW,
                 Uri.parse(UriUtil.buildYoutubeVideoUrl(trailer.getKey()))));
+    }
+
+    @Override
+    public void onReviewClick(Review review) {
+        ReviewDetailFragment.newInstance(review)
+                .show(getSupportFragmentManager(), REVIEW_FRAGMENT_TAG);
     }
 }

@@ -59,7 +59,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
     }
 
     public interface TrailerAdapterOnClickHandler {
-        void onClick(Trailer trailer);
+        void onTrailerClick(Trailer trailer);
     }
 
     class TrailerAdapterViewHolder extends RecyclerView.ViewHolder
@@ -77,7 +77,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
 
         @Override
         public void onClick(final View view) {
-            mTrailerOnClickHandler.onClick(mTrailers.get(getAdapterPosition()));
+            mTrailerOnClickHandler.onTrailerClick(mTrailers.get(getAdapterPosition()));
         }
     }
 }

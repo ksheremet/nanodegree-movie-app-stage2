@@ -7,32 +7,28 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import ch.sheremet.katarina.movieapp.MovieMainApplication;
 import ch.sheremet.katarina.movieapp.R;
 import ch.sheremet.katarina.movieapp.base.BaseActivity;
 import ch.sheremet.katarina.movieapp.model.Movie;
 import ch.sheremet.katarina.movieapp.model.Review;
-import ch.sheremet.katarina.movieapp.model.ReviewsResponse;
 import ch.sheremet.katarina.movieapp.model.Trailer;
-import ch.sheremet.katarina.movieapp.model.TrailersResponse;
 import ch.sheremet.katarina.movieapp.reviewdetail.ReviewDetailFragment;
 import ch.sheremet.katarina.movieapp.utilities.UriUtil;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MovieDetailActivity extends BaseActivity
         implements TrailerAdapter.TrailerAdapterOnClickHandler,
-        ReviewAdapter.ReviewAdapterOnClickHandler {
+        ReviewAdapter.ReviewAdapterOnClickHandler,
+        IMovieDetailView{
 
     private static final String TAG = MovieDetailActivity.class.getSimpleName();
     private static final String MOVIE_PARAM = "movie";
@@ -56,6 +52,7 @@ public class MovieDetailActivity extends BaseActivity
     private TrailerAdapter mTrailersAdapter;
     private ReviewAdapter mReviewsAdapter;
     private Movie mMovie;
+    private IMovieDetailPresenter mPresenter;
 
     public static void start(final Context context, final Movie movie) {
         Intent intent = new Intent(context, MovieDetailActivity.class);
@@ -77,6 +74,7 @@ public class MovieDetailActivity extends BaseActivity
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         setTitle(mMovie.getOriginalTitle());
+        // TODO: show default picture and on error.
         Picasso.get()
                 .load(UriUtil.buildPosterUrl(mMovie.getPoster()))
                 .into(mPosterIV);
@@ -85,6 +83,7 @@ public class MovieDetailActivity extends BaseActivity
         mPlotSummaryTV.setText(mMovie.getPlotSynopsis());
         mRatingTV.setText(getString(R.string.rating_detail_tv, mMovie.getUserRating()));
         mReleaseDateTV.setText(getString(R.string.release_detail_tv, mMovie.getReleaseDate()));
+        mPresenter = new MovieDetailPresenterImpl(this);
         setTrailersView();
         setReviewsView();
     }
@@ -95,25 +94,7 @@ public class MovieDetailActivity extends BaseActivity
         mTrailersRecyclerView.setLayoutManager(linearLayoutManager);
         mTrailersAdapter = new TrailerAdapter(this);
         mTrailersRecyclerView.setAdapter(mTrailersAdapter);
-
-        // TODO: implement this in Presenter
-        MovieMainApplication.apiManager.getMovieTrailers(new Callback<TrailersResponse>() {
-            @Override
-            public void onResponse(final Call<TrailersResponse> call,
-                                   final Response<TrailersResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Log.d(TAG, response.body().getTrailers().toString());
-                    mTrailersAdapter.setTrailers(response.body().getTrailers());
-                } else {
-                    Log.e(TAG, response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<TrailersResponse> call, Throwable t) {
-                Log.e(TAG, "Error fetching trailers", t);
-            }
-        }, mMovie.getId());
+        mPresenter.getTrailers(mMovie.getId());
     }
 
     private void setReviewsView() {
@@ -122,31 +103,13 @@ public class MovieDetailActivity extends BaseActivity
         mReviewsRecyclerView.setLayoutManager(linearLayoutManager);
         mReviewsAdapter = new ReviewAdapter(this);
         mReviewsRecyclerView.setAdapter(mReviewsAdapter);
-
-
-        // TODO: implement this in Presenter
-        MovieMainApplication.apiManager.getMovieReviews(new Callback<ReviewsResponse>() {
-            @Override
-            public void onResponse(final Call<ReviewsResponse> call,
-                                   final Response<ReviewsResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Log.d(TAG, response.body().getReviews().toString());
-                    mReviewsAdapter.setReviews(response.body().getReviews());
-                } else {
-                    Log.e(TAG, response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ReviewsResponse> call, Throwable t) {
-                Log.e(TAG, "Error fetching trailers", t);
-            }
-        }, mMovie.getId());
+        mPresenter.getReviews(mMovie.getId());
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
+            // TODO: implement nav up
             onBackPressed();
             return true;
         }
@@ -163,5 +126,15 @@ public class MovieDetailActivity extends BaseActivity
     public void onReviewClick(Review review) {
         ReviewDetailFragment.newInstance(review)
                 .show(getSupportFragmentManager(), REVIEW_FRAGMENT_TAG);
+    }
+
+    @Override
+    public void showReviews(final List<Review> reviews) {
+        mReviewsAdapter.setReviews(reviews);
+    }
+
+    @Override
+    public void showTrailers(final List<Trailer> trailers) {
+        mTrailersAdapter.setTrailers(trailers);
     }
 }

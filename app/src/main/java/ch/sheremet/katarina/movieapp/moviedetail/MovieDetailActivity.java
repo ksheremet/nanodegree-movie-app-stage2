@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -19,6 +18,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import ch.sheremet.katarina.movieapp.MovieMainApplication;
 import ch.sheremet.katarina.movieapp.R;
+import ch.sheremet.katarina.movieapp.base.BaseActivity;
 import ch.sheremet.katarina.movieapp.model.Movie;
 import ch.sheremet.katarina.movieapp.model.Review;
 import ch.sheremet.katarina.movieapp.model.ReviewsResponse;
@@ -30,7 +30,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MovieDetailActivity extends AppCompatActivity
+public class MovieDetailActivity extends BaseActivity
         implements TrailerAdapter.TrailerAdapterOnClickHandler,
         ReviewAdapter.ReviewAdapterOnClickHandler {
 

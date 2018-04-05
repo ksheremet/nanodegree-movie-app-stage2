@@ -1,4 +1,4 @@
-package ch.sheremet.katarina.movieapp;
+package ch.sheremet.katarina.movieapp.listmovies;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,6 +10,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import ch.sheremet.katarina.movieapp.R;
 import ch.sheremet.katarina.movieapp.model.Movie;
 import ch.sheremet.katarina.movieapp.utilities.UriUtil;
 

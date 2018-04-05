@@ -1,18 +1,14 @@
-package ch.sheremet.katarina.movieapp;
+package ch.sheremet.katarina.movieapp.listmovies;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,16 +19,15 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import ch.sheremet.katarina.movieapp.R;
+import ch.sheremet.katarina.movieapp.base.BaseActivity;
 import ch.sheremet.katarina.movieapp.model.Movie;
-import ch.sheremet.katarina.movieapp.model.MoviesResponse;
 import ch.sheremet.katarina.movieapp.moviedetail.MovieDetailActivity;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-public class MovieMainActivity extends AppCompatActivity
+public class MovieMainActivity extends BaseActivity
         implements LoaderManager.LoaderCallbacks<List<Movie>>,
-        MovieAdapter.MovieAdapterOnClickHandler {
+        MovieAdapter.MovieAdapterOnClickHandler,
+        IMovieMainView {
 
     private static final int MOVIE_LOADER_ID = 148;
     private static final String MOVIE_BUNDLE_PARAM = "movies";
@@ -45,7 +40,7 @@ public class MovieMainActivity extends AppCompatActivity
     ProgressBar mLoadingMoviesIndicator;
     private MovieAdapter mMovieAdapter;
     private SharedPreferences mMoviePref;
-    private Callback<MoviesResponse> mMoviesCallback;
+    private IMovieMainPresenter mPresenter;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -63,37 +58,14 @@ public class MovieMainActivity extends AppCompatActivity
         getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
         String movie_pref = mMoviePref.getString(getString(R.string.movie_pref_key),
                 getString(R.string.popular_movies_pref));
-        mMoviesCallback = new Callback<MoviesResponse>() {
-            @Override
-            public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
-                if (response.isSuccessful()) {
-                    mLoadingMoviesIndicator.setVisibility(View.INVISIBLE);
-                    mMovieAdapter.setMovies(response.body().getMovies());
-                } else {
-                    showErrorMessage(getString(R.string.error_occurred_error_message));
-                    Log.e(TAG, response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<MoviesResponse> call, Throwable t) {
-                showErrorMessage(getString(R.string.error_occurred_error_message));
-                Log.e(TAG, "Error getting movies", t);
-            }
-        };
+        // TODO: use Dagger2 for init
+        mPresenter = new MovieMainPresenterImpl(this);
 
         loadMoviesData(movie_pref);
     }
 
-    public boolean isOnline() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm == null) return false;
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
-    }
-
     private void loadMoviesData(String movie_pref) {
+        mLoadingMoviesIndicator.setVisibility(View.VISIBLE);
         if (!isOnline()) {
             showErrorMessage(getString(R.string.offline_user_message));
             return;
@@ -101,14 +73,13 @@ public class MovieMainActivity extends AppCompatActivity
         Bundle queryBundle = new Bundle();
         if (movie_pref.equals(getString(R.string.top_rated_movies_pref))) {
             queryBundle.putString(MOVIE_BUNDLE_PARAM, getString(R.string.top_rated_movies_pref));
-            MovieMainApplication.apiManager.getTopRatedMovies(mMoviesCallback);
+            mPresenter.getTopRatedMovies();
 
         } else {
             queryBundle.putString(MOVIE_BUNDLE_PARAM, getString(R.string.popular_movies_pref));
-            MovieMainApplication.apiManager.getPopularMovies(mMoviesCallback);
+            mPresenter.getPopularMovies();
 
         }
-        showMoviesData();
         // TODO: To be implemented for Content Provider
         /*LoaderManager loaderManager = getSupportLoaderManager();
         Loader<String> movieLoader = loaderManager.getLoader(MOVIE_LOADER_ID);
@@ -119,10 +90,10 @@ public class MovieMainActivity extends AppCompatActivity
         }*/
     }
 
-    private void showMoviesData() {
+    /*private void showMoviesData() {
         mErrorMessage.setVisibility(View.INVISIBLE);
         mMoviesRecyclerView.setVisibility(View.VISIBLE);
-    }
+    }*/
 
     private void showErrorMessage(String error) {
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
@@ -184,6 +155,19 @@ public class MovieMainActivity extends AppCompatActivity
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    @Override
+    public void showMovieData(List<Movie> movies) {
+        mLoadingMoviesIndicator.setVisibility(View.INVISIBLE);
+        mMovieAdapter.setMovies(movies);
+        mErrorMessage.setVisibility(View.INVISIBLE);
+        mMoviesRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void showErrorOccurredMessage() {
+        showErrorMessage(getString(R.string.error_occurred_error_message));
     }
 
     public static class MovieListLoader extends AsyncTaskLoader<List<Movie>> {

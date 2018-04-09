@@ -17,10 +17,15 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ch.sheremet.katarina.movieapp.R;
 import ch.sheremet.katarina.movieapp.base.BaseActivity;
+import ch.sheremet.katarina.movieapp.di.DaggerMovieMainComponent;
+import ch.sheremet.katarina.movieapp.di.MovieMainComponent;
+import ch.sheremet.katarina.movieapp.di.MovieMainModule;
 import ch.sheremet.katarina.movieapp.model.Movie;
 import ch.sheremet.katarina.movieapp.moviedetail.MovieDetailActivity;
 
@@ -40,7 +45,8 @@ public class MovieMainActivity extends BaseActivity
     ProgressBar mLoadingMoviesIndicator;
     private MovieAdapter mMovieAdapter;
     private SharedPreferences mMoviePref;
-    private IMovieMainPresenter mPresenter;
+    @Inject
+    IMovieMainPresenter mPresenter;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -58,8 +64,9 @@ public class MovieMainActivity extends BaseActivity
         getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
         String movie_pref = mMoviePref.getString(getString(R.string.movie_pref_key),
                 getString(R.string.popular_movies_pref));
-        // TODO: use Dagger2 for init
-        mPresenter = new MovieMainPresenterImpl(this);
+        MovieMainComponent component = DaggerMovieMainComponent.builder()
+                .movieMainModule(new MovieMainModule(this)).build();
+        component.injectMovieMainActivity(this);
 
         loadMoviesData(movie_pref);
     }

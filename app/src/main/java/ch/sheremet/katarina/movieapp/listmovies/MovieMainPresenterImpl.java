@@ -2,6 +2,8 @@ package ch.sheremet.katarina.movieapp.listmovies;
 
 import android.util.Log;
 
+import javax.inject.Inject;
+
 import ch.sheremet.katarina.movieapp.model.MoviesResponse;
 import ch.sheremet.katarina.movieapp.utilities.ApiManager;
 import retrofit2.Call;
@@ -15,14 +17,14 @@ public class MovieMainPresenterImpl implements IMovieMainPresenter {
 
     private static final String TAG = MovieMainPresenterImpl.class.getSimpleName();
 
-    private IMovieMainView mView;
     private Callback<MoviesResponse> mMoviesCallback;
-    // TODO(ksheremet): Dagger2
-    private final ApiManager mApiManager = ApiManager.getInstance();
+    private ApiManager mApiManager;
+    private IMovieMainView mView;
 
-
-    public MovieMainPresenterImpl(final IMovieMainView view) {
+    @Inject
+    public MovieMainPresenterImpl(final IMovieMainView view, final ApiManager apiManager) {
         this.mView = view;
+        this.mApiManager = apiManager;
         mMoviesCallback = new Callback<MoviesResponse>() {
             @Override
             public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {

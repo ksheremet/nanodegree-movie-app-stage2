@@ -15,10 +15,15 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ch.sheremet.katarina.movieapp.R;
 import ch.sheremet.katarina.movieapp.base.BaseActivity;
+import ch.sheremet.katarina.movieapp.di.DaggerMovieDetailComponent;
+import ch.sheremet.katarina.movieapp.di.MovieDetailComponent;
+import ch.sheremet.katarina.movieapp.di.MovieDetailModule;
 import ch.sheremet.katarina.movieapp.model.Movie;
 import ch.sheremet.katarina.movieapp.model.Review;
 import ch.sheremet.katarina.movieapp.model.Trailer;
@@ -52,7 +57,8 @@ public class MovieDetailActivity extends BaseActivity
     private TrailerAdapter mTrailersAdapter;
     private ReviewAdapter mReviewsAdapter;
     private Movie mMovie;
-    private IMovieDetailPresenter mPresenter;
+    @Inject
+    IMovieDetailPresenter mPresenter;
 
     public static void start(final Context context, final Movie movie) {
         Intent intent = new Intent(context, MovieDetailActivity.class);
@@ -83,7 +89,11 @@ public class MovieDetailActivity extends BaseActivity
         mPlotSummaryTV.setText(mMovie.getPlotSynopsis());
         mRatingTV.setText(getString(R.string.rating_detail_tv, mMovie.getUserRating()));
         mReleaseDateTV.setText(getString(R.string.release_detail_tv, mMovie.getReleaseDate()));
-        mPresenter = new MovieDetailPresenterImpl(this);
+        MovieDetailComponent component = DaggerMovieDetailComponent
+                .builder()
+                .movieDetailModule(new MovieDetailModule(this))
+                .build();
+        component.injectMovieDetailActivity(this);
         setTrailersView();
         setReviewsView();
     }

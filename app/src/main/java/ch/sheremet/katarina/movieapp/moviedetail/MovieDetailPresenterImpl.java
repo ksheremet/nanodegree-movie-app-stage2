@@ -17,10 +17,11 @@ public class MovieDetailPresenterImpl implements IMovieDetailPresenter {
     private static final String TAG = MovieDetailPresenterImpl.class.getSimpleName();
 
     private IMovieDetailView mView;
-    private ApiManager mApiManager = ApiManager.getInstance();
+    private ApiManager mApiManager;
 
-    public MovieDetailPresenterImpl(IMovieDetailView view) {
+    public MovieDetailPresenterImpl(IMovieDetailView view, ApiManager apiManager) {
         this.mView = view;
+        this.mApiManager = apiManager;
     }
 
     @Override

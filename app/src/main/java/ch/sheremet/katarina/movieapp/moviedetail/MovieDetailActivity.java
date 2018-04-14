@@ -19,6 +19,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import ch.sheremet.katarina.movieapp.R;
 import ch.sheremet.katarina.movieapp.base.BaseActivity;
 import ch.sheremet.katarina.movieapp.di.DaggerMovieDetailComponent;
@@ -33,7 +34,7 @@ import ch.sheremet.katarina.movieapp.utilities.UriUtil;
 public class MovieDetailActivity extends BaseActivity
         implements TrailerAdapter.TrailerAdapterOnClickHandler,
         ReviewAdapter.ReviewAdapterOnClickHandler,
-        IMovieDetailView{
+        IMovieDetailView {
 
     private static final String TAG = MovieDetailActivity.class.getSimpleName();
     private static final String MOVIE_PARAM = "movie";
@@ -59,6 +60,7 @@ public class MovieDetailActivity extends BaseActivity
     private Movie mMovie;
     @Inject
     IMovieDetailPresenter mPresenter;
+    private boolean mIsMovieFavourite;
 
     public static void start(final Context context, final Movie movie) {
         Intent intent = new Intent(context, MovieDetailActivity.class);
@@ -96,6 +98,7 @@ public class MovieDetailActivity extends BaseActivity
         component.injectMovieDetailActivity(this);
         setTrailersView();
         setReviewsView();
+        mIsMovieFavourite = false;
     }
 
     private void setTrailersView() {
@@ -109,7 +112,7 @@ public class MovieDetailActivity extends BaseActivity
 
     private void setReviewsView() {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,
-                LinearLayoutManager.VERTICAL,false);
+                LinearLayoutManager.VERTICAL, false);
         mReviewsRecyclerView.setLayoutManager(linearLayoutManager);
         mReviewsAdapter = new ReviewAdapter(this);
         mReviewsRecyclerView.setAdapter(mReviewsAdapter);
@@ -146,5 +149,16 @@ public class MovieDetailActivity extends BaseActivity
     @Override
     public void showTrailers(final List<Trailer> trailers) {
         mTrailersAdapter.setTrailers(trailers);
+    }
+
+    @OnClick(R.id.add_to_favourite_iv)
+    protected void onFavouriteMovieClick(ImageView addToFavourite) {
+        if (mIsMovieFavourite) {
+            addToFavourite.setImageResource(android.R.drawable.btn_star_big_off);
+            mIsMovieFavourite = false;
+        } else {
+            addToFavourite.setImageResource(android.R.drawable.btn_star_big_on);
+            mIsMovieFavourite = true;
+        }
     }
 }

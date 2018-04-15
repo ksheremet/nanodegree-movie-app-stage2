@@ -1,7 +1,10 @@
 package ch.sheremet.katarina.movieapp.moviedetail;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -25,6 +28,8 @@ import ch.sheremet.katarina.movieapp.base.BaseActivity;
 import ch.sheremet.katarina.movieapp.di.DaggerMovieDetailComponent;
 import ch.sheremet.katarina.movieapp.di.MovieDetailComponent;
 import ch.sheremet.katarina.movieapp.di.MovieDetailModule;
+import ch.sheremet.katarina.movieapp.favouritemovies.data.MovieDbHelper;
+import ch.sheremet.katarina.movieapp.favouritemovies.data.MoviesContract;
 import ch.sheremet.katarina.movieapp.model.Movie;
 import ch.sheremet.katarina.movieapp.model.Review;
 import ch.sheremet.katarina.movieapp.model.Trailer;
@@ -54,13 +59,17 @@ public class MovieDetailActivity extends BaseActivity
     RecyclerView mTrailersRecyclerView;
     @BindView(R.id.reviews_rv)
     RecyclerView mReviewsRecyclerView;
+    @BindView(R.id.add_to_favourite_iv)
+    ImageView mFavouriteMovieImageView;
 
     private TrailerAdapter mTrailersAdapter;
     private ReviewAdapter mReviewsAdapter;
     private Movie mMovie;
     @Inject
     IMovieDetailPresenter mPresenter;
+
     private boolean mIsMovieFavourite;
+    private SQLiteDatabase mDb;
 
     public static void start(final Context context, final Movie movie) {
         Intent intent = new Intent(context, MovieDetailActivity.class);
@@ -99,6 +108,12 @@ public class MovieDetailActivity extends BaseActivity
         setTrailersView();
         setReviewsView();
         mIsMovieFavourite = false;
+
+        // TODO: Refactor
+        // TODO: dagger
+        MovieDbHelper dbHelper = new MovieDbHelper(this);
+        mDb = dbHelper.getWritableDatabase();
+        isMovieFavourite();
     }
 
     private void setTrailersView() {
@@ -151,14 +166,56 @@ public class MovieDetailActivity extends BaseActivity
         mTrailersAdapter.setTrailers(trailers);
     }
 
+    // TODO: refactor
     @OnClick(R.id.add_to_favourite_iv)
     protected void onFavouriteMovieClick(ImageView addToFavourite) {
         if (mIsMovieFavourite) {
             addToFavourite.setImageResource(android.R.drawable.btn_star_big_off);
             mIsMovieFavourite = false;
+            System.out.println("Remove Movie output: " + removeMovie());
         } else {
             addToFavourite.setImageResource(android.R.drawable.btn_star_big_on);
             mIsMovieFavourite = true;
+            System.out.println("Add Movie output: " + addMovie());
         }
     }
+
+
+    // TODO: Refactor, dagger, presenter
+    private long addMovie() {
+        ContentValues cv = new ContentValues();
+        cv.put(MoviesContract.MovieEntry.COLUMN_MOVIE_ID, mMovie.getId());
+        cv.put(MoviesContract.MovieEntry.COLUMN_TITLE, mMovie.getOriginalTitle());
+        cv.put(MoviesContract.MovieEntry.COLUMN_PLOT_SYNOPSIS, mMovie.getPlotSynopsis());
+        cv.put(MoviesContract.MovieEntry.COLUMN_RAITING, mMovie.getUserRating());
+        cv.put(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE, mMovie.getReleaseDate());
+        cv.put(MoviesContract.MovieEntry.COLUMN_POSTER_PATH, mMovie.getPoster());
+        return mDb.insert(MoviesContract.MovieEntry.TABLE_NAME, null, cv);
+    }
+
+    // TODO: refactor
+    private int removeMovie() {
+        return mDb.delete(MoviesContract.MovieEntry.TABLE_NAME,
+                MoviesContract.MovieEntry.COLUMN_MOVIE_ID + "=" + mMovie.getId(),
+                null);
+    }
+
+    private void isMovieFavourite() {
+        Cursor cursor = mDb.query(MoviesContract.MovieEntry.TABLE_NAME,
+                null,
+                MoviesContract.MovieEntry.COLUMN_MOVIE_ID + "=" + mMovie.getId(),
+                null,
+                null,
+                null,
+                null);
+        if (cursor.getCount() == 0) {
+            mIsMovieFavourite = false;
+            mFavouriteMovieImageView.setImageResource(android.R.drawable.btn_star_big_off);
+        } else {
+            mIsMovieFavourite = true;
+            mFavouriteMovieImageView.setImageResource(android.R.drawable.btn_star_big_on);
+        }
+        cursor.close();
+    }
+
 }

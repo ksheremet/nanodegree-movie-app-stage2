@@ -98,7 +98,8 @@ public class MovieDetailActivity extends BaseActivity
         mPosterIV.setContentDescription(mMovie.getPlotSynopsis());
         mTitleTV.setText(mMovie.getOriginalTitle());
         mPlotSummaryTV.setText(mMovie.getPlotSynopsis());
-        mRatingTV.setText(getString(R.string.rating_detail_tv, mMovie.getUserRating()));
+        mRatingTV.setText(getString(R.string.rating_detail_tv,
+                String.valueOf(mMovie.getUserRating())));
         mReleaseDateTV.setText(getString(R.string.release_detail_tv, mMovie.getReleaseDate()));
         MovieDetailComponent component = DaggerMovieDetailComponent
                 .builder()
@@ -217,5 +218,4 @@ public class MovieDetailActivity extends BaseActivity
         }
         cursor.close();
     }
-
 }

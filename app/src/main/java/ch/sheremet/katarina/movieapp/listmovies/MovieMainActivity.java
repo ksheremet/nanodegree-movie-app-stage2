@@ -89,7 +89,7 @@ public class MovieMainActivity extends BaseActivity
                 null,
                 null,
                 null,
-                MoviesContract.MovieEntry.COLUMN_RAITING
+                MoviesContract.MovieEntry.COLUMN_RAITING + " DESC"
         );
 
         System.out.println("Cursor length: " + cursor.getCount());
@@ -101,7 +101,7 @@ public class MovieMainActivity extends BaseActivity
            movie.setId(cursor.getInt(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_MOVIE_ID)));
            movie.setOriginalTitle(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_TITLE)));
            movie.setPlotSynopsis(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_PLOT_SYNOPSIS)));
-           movie.setUserRating(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RAITING)));
+           movie.setUserRating(cursor.getDouble(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RAITING)));
            movie.setReleaseDate(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE)));
            movie.setPoster(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_POSTER_PATH)));
 

@@ -9,6 +9,7 @@
 
     <string name="error_occurred_error_message">Error occurred. Try it later</string>
     <string name="offline_user_message">You are offline. Check your Internet connection</string>
+    <string name="no_favourite_movies_user_message">No favourite movies</string>
 
     <string name="movie_pref_key" translatable="false">movie_pref_key</string>
     <string name="popular_movies_pref" translatable="false">popular</string>

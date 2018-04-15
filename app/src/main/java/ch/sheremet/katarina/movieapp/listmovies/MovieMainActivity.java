@@ -3,10 +3,15 @@ package ch.sheremet.katarina.movieapp.listmovies;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,16 +30,17 @@ import ch.sheremet.katarina.movieapp.base.BaseActivity;
 import ch.sheremet.katarina.movieapp.di.DaggerMovieMainComponent;
 import ch.sheremet.katarina.movieapp.di.MovieMainComponent;
 import ch.sheremet.katarina.movieapp.di.MovieMainModule;
-import ch.sheremet.katarina.movieapp.favouritemovies.data.MovieDbHelper;
 import ch.sheremet.katarina.movieapp.favouritemovies.data.MoviesContract;
 import ch.sheremet.katarina.movieapp.model.Movie;
 import ch.sheremet.katarina.movieapp.moviedetail.MovieDetailActivity;
 
 public class MovieMainActivity extends BaseActivity
         implements MovieAdapter.MovieAdapterOnClickHandler,
-        IMovieMainView {
+        IMovieMainView,
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = MovieMainActivity.class.getSimpleName();
+    private static final int MOVIE_LOADER_ID = 123;
     @BindView(R.id.movie_rv)
     RecyclerView mMoviesRecyclerView;
     @BindView(R.id.error_message_tv)
@@ -45,9 +51,6 @@ public class MovieMainActivity extends BaseActivity
     private SharedPreferences mMoviePref;
     @Inject
     IMovieMainPresenter mPresenter;
-
-    // TODO
-    private SQLiteDatabase mDb;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -66,10 +69,6 @@ public class MovieMainActivity extends BaseActivity
         MovieMainComponent component = DaggerMovieMainComponent.builder()
                 .movieMainModule(new MovieMainModule(this)).build();
         component.injectMovieMainActivity(this);
-
-        // TODO: dagger
-        MovieDbHelper dbHelper = new MovieDbHelper(this);
-        mDb = dbHelper.getReadableDatabase();
     }
 
     @Override
@@ -78,43 +77,6 @@ public class MovieMainActivity extends BaseActivity
         String movie_pref = mMoviePref.getString(getString(R.string.movie_pref_key),
                 getString(R.string.popular_movies_pref));
         loadMoviesData(movie_pref);
-    }
-
-    // TODO: refactor
-    private void getFavouriteMovies() {
-        Cursor cursor =  mDb.query(
-                MoviesContract.MovieEntry.TABLE_NAME,
-                null,
-                null,
-                null,
-                null,
-                null,
-                MoviesContract.MovieEntry.COLUMN_RAITING + " DESC"
-        );
-
-        System.out.println("Cursor length: " + cursor.getCount());
-
-        List<Movie> movieList = new ArrayList<>(cursor.getCount());
-
-        while (cursor.moveToNext()){
-           Movie movie = new Movie();
-           movie.setId(cursor.getInt(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_MOVIE_ID)));
-           movie.setOriginalTitle(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_TITLE)));
-           movie.setPlotSynopsis(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_PLOT_SYNOPSIS)));
-           movie.setUserRating(cursor.getDouble(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RAITING)));
-           movie.setReleaseDate(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE)));
-           movie.setPoster(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_POSTER_PATH)));
-
-           movieList.add(movie);
-        }
-
-        System.out.println("Movies: " + movieList.toString());
-        if (movieList.isEmpty()) {
-            mMovieAdapter.setMovies(null);
-        } else {
-            mMovieAdapter.setMovies(movieList);
-        }
-        cursor.close();
     }
 
     private void loadMoviesData(String movie_pref) {
@@ -133,8 +95,13 @@ public class MovieMainActivity extends BaseActivity
         }
         if (movie_pref.equals(getString(R.string.favourite_movies_pref))) {
             mLoadingMoviesIndicator.setVisibility(View.INVISIBLE);
-            // TODO:
-            getFavouriteMovies();
+            Loader<Cursor> movieLoader = getSupportLoaderManager().getLoader(MOVIE_LOADER_ID);
+            if (movieLoader == null) {
+                getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
+            } else {
+                getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, this);
+            }
+
         }
     }
 
@@ -192,5 +159,84 @@ public class MovieMainActivity extends BaseActivity
     @Override
     public void showErrorOccurredMessage() {
         showErrorMessage(getString(R.string.error_occurred_error_message));
+    }
+
+    @NonNull
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+        return new FavouriteMoviesLoader(this);
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
+        if (cursor == null) {
+            showErrorOccurredMessage();
+            return;
+        }
+        List<Movie> movieList = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            Movie movie = new Movie();
+            movie.setId(cursor.getInt(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_MOVIE_ID)));
+            movie.setOriginalTitle(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_TITLE)));
+            movie.setPlotSynopsis(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_PLOT_SYNOPSIS)));
+            movie.setUserRating(cursor.getDouble(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RAITING)));
+            movie.setReleaseDate(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE)));
+            movie.setPoster(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_POSTER_PATH)));
+
+            movieList.add(movie);
+        }
+        if (movieList.isEmpty()) {
+            showErrorMessage(getString(R.string.no_favourite_movies_user_message));
+        } else {
+            showMovieData(movieList);
+        }
+        cursor.close();
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+
+    }
+
+    public static class FavouriteMoviesLoader extends AsyncTaskLoader<Cursor> {
+        Cursor mFavouriteMovies = null;
+
+        FavouriteMoviesLoader(@NonNull Context context) {
+            super(context);
+        }
+
+        @Override
+        protected void onStartLoading() {
+            if (mFavouriteMovies != null) {
+                deliverResult(mFavouriteMovies);
+            } else {
+                forceLoad();
+            }
+        }
+
+        @Nullable
+        @Override
+        public Cursor loadInBackground() {
+            Cursor cursor;
+            try {
+                cursor = getContext()
+                        .getContentResolver().query(MoviesContract.MovieEntry.CONTENT_URI,
+                                null,
+                                null,
+                                null,
+                                MoviesContract.MovieEntry.COLUMN_RAITING + " DESC");
+
+                return cursor;
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to load data", e);
+                return null;
+            }
+        }
+
+        @Override
+        public void deliverResult(@Nullable Cursor data) {
+            mFavouriteMovies = data;
+            super.deliverResult(data);
+        }
     }
 }

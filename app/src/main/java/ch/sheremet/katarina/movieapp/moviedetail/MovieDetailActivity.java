@@ -4,12 +4,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -28,7 +28,6 @@ import ch.sheremet.katarina.movieapp.base.BaseActivity;
 import ch.sheremet.katarina.movieapp.di.DaggerMovieDetailComponent;
 import ch.sheremet.katarina.movieapp.di.MovieDetailComponent;
 import ch.sheremet.katarina.movieapp.di.MovieDetailModule;
-import ch.sheremet.katarina.movieapp.favouritemovies.data.MovieDbHelper;
 import ch.sheremet.katarina.movieapp.favouritemovies.data.MoviesContract;
 import ch.sheremet.katarina.movieapp.model.Movie;
 import ch.sheremet.katarina.movieapp.model.Review;
@@ -69,7 +68,6 @@ public class MovieDetailActivity extends BaseActivity
     IMovieDetailPresenter mPresenter;
 
     private boolean mIsMovieFavourite;
-    private SQLiteDatabase mDb;
 
     public static void start(final Context context, final Movie movie) {
         Intent intent = new Intent(context, MovieDetailActivity.class);
@@ -109,11 +107,6 @@ public class MovieDetailActivity extends BaseActivity
         setTrailersView();
         setReviewsView();
         mIsMovieFavourite = false;
-
-        // TODO: Refactor
-        // TODO: dagger
-        MovieDbHelper dbHelper = new MovieDbHelper(this);
-        mDb = dbHelper.getWritableDatabase();
         isMovieFavourite();
     }
 
@@ -173,17 +166,17 @@ public class MovieDetailActivity extends BaseActivity
         if (mIsMovieFavourite) {
             addToFavourite.setImageResource(android.R.drawable.btn_star_big_off);
             mIsMovieFavourite = false;
-            System.out.println("Remove Movie output: " + removeMovie());
+            Log.d(TAG, "Remove Movie output: " + removeMovie());
         } else {
             addToFavourite.setImageResource(android.R.drawable.btn_star_big_on);
             mIsMovieFavourite = true;
-            System.out.println("Add Movie output: " + addMovie());
+            Log.d(TAG,"Add Movie output: " + addMovie());
         }
     }
 
 
     // TODO: Refactor, dagger, presenter
-    private long addMovie() {
+    private Uri addMovie() {
         ContentValues cv = new ContentValues();
         cv.put(MoviesContract.MovieEntry.COLUMN_MOVIE_ID, mMovie.getId());
         cv.put(MoviesContract.MovieEntry.COLUMN_TITLE, mMovie.getOriginalTitle());
@@ -191,31 +184,30 @@ public class MovieDetailActivity extends BaseActivity
         cv.put(MoviesContract.MovieEntry.COLUMN_RAITING, mMovie.getUserRating());
         cv.put(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE, mMovie.getReleaseDate());
         cv.put(MoviesContract.MovieEntry.COLUMN_POSTER_PATH, mMovie.getPoster());
-        return mDb.insert(MoviesContract.MovieEntry.TABLE_NAME, null, cv);
+        return getContentResolver().insert(MoviesContract.MovieEntry.CONTENT_URI, cv);
     }
 
     // TODO: refactor
     private int removeMovie() {
-        return mDb.delete(MoviesContract.MovieEntry.TABLE_NAME,
-                MoviesContract.MovieEntry.COLUMN_MOVIE_ID + "=" + mMovie.getId(),
-                null);
+        Uri uri = MoviesContract.MovieEntry.CONTENT_URI.buildUpon()
+                .appendPath(String.valueOf(mMovie.getId())).build();
+        return getContentResolver().delete(uri, null, null);
     }
 
     private void isMovieFavourite() {
-        Cursor cursor = mDb.query(MoviesContract.MovieEntry.TABLE_NAME,
-                null,
-                MoviesContract.MovieEntry.COLUMN_MOVIE_ID + "=" + mMovie.getId(),
-                null,
-                null,
-                null,
-                null);
-        if (cursor.getCount() == 0) {
+       Uri uri = MoviesContract.MovieEntry.CONTENT_URI.buildUpon()
+               .appendPath(String.valueOf(mMovie.getId())).build();
+       Cursor cursor = getContentResolver().query(uri, null, null, null,
+               null);
+        if (cursor == null || cursor.getCount() == 0) {
             mIsMovieFavourite = false;
             mFavouriteMovieImageView.setImageResource(android.R.drawable.btn_star_big_off);
         } else {
             mIsMovieFavourite = true;
             mFavouriteMovieImageView.setImageResource(android.R.drawable.btn_star_big_on);
         }
-        cursor.close();
+        if (cursor != null) {
+            cursor.close();
+        }
     }
 }

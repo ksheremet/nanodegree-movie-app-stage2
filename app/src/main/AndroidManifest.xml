@@ -23,6 +23,10 @@
         </activity>
         <activity android:name=".moviedetail.MovieDetailActivity" />
         <activity android:name=".base.BaseActivity" />
+        <provider
+            android:authorities="ch.sheremet.katarina.movieapp"
+            android:name=".favouritemovies.data.MovieContentProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

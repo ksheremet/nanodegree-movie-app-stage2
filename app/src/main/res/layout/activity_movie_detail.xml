@@ -25,12 +25,14 @@
 
         <TextView
             android:id="@+id/detail_movie_title_tv"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_marginStart="@dimen/border_indent"
             android:layout_marginTop="@dimen/items_indent"
             android:textAppearance="@style/TextAppearance.AppCompat.Headline"
             android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/detail_movie_poster_iv"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="The Maze Runner" />

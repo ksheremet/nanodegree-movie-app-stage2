@@ -5,14 +5,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -29,6 +34,7 @@ import ch.sheremet.katarina.movieapp.di.DaggerMovieDetailComponent;
 import ch.sheremet.katarina.movieapp.di.MovieDetailComponent;
 import ch.sheremet.katarina.movieapp.di.MovieDetailModule;
 import ch.sheremet.katarina.movieapp.favouritemovies.data.MoviesContract;
+import ch.sheremet.katarina.movieapp.favouritemovies.loaders.FetchFavouriteMoviesLoader;
 import ch.sheremet.katarina.movieapp.model.Movie;
 import ch.sheremet.katarina.movieapp.model.Review;
 import ch.sheremet.katarina.movieapp.model.Trailer;
@@ -43,6 +49,7 @@ public class MovieDetailActivity extends BaseActivity
     private static final String TAG = MovieDetailActivity.class.getSimpleName();
     private static final String MOVIE_PARAM = "movie";
     private static final String REVIEW_FRAGMENT_TAG = "review_detail";
+    private static final int FAVOURITE_MOVIE_LOADER_ID = 111;
 
     @BindView(R.id.detail_movie_poster_iv)
     ImageView mPosterIV;
@@ -160,23 +167,29 @@ public class MovieDetailActivity extends BaseActivity
         mTrailersAdapter.setTrailers(trailers);
     }
 
-    // TODO: refactor
     @OnClick(R.id.add_to_favourite_iv)
-    protected void onFavouriteMovieClick(ImageView addToFavourite) {
+    protected void onFavouriteMovieClick() {
         if (mIsMovieFavourite) {
-            addToFavourite.setImageResource(android.R.drawable.btn_star_big_off);
             mIsMovieFavourite = false;
-            Log.d(TAG, "Remove Movie output: " + removeMovie());
+            removeMovieFromFavourite();
         } else {
-            addToFavourite.setImageResource(android.R.drawable.btn_star_big_on);
             mIsMovieFavourite = true;
-            Log.d(TAG,"Add Movie output: " + addMovie());
+            addMovieToFavourite();
+        }
+        setFavouriteButtonBackground(mIsMovieFavourite);
+    }
+
+    private void setFavouriteButtonBackground(boolean isFavourite) {
+        if (isFavourite) {
+            mFavouriteMovieImageView.setImageResource(android.R.drawable.btn_star_big_on);
+        } else {
+            mFavouriteMovieImageView.setImageResource(android.R.drawable.btn_star_big_off);
         }
     }
 
 
     // TODO: Refactor, dagger, presenter
-    private Uri addMovie() {
+    private Uri addMovieToFavourite() {
         ContentValues cv = new ContentValues();
         cv.put(MoviesContract.MovieEntry.COLUMN_MOVIE_ID, mMovie.getId());
         cv.put(MoviesContract.MovieEntry.COLUMN_TITLE, mMovie.getOriginalTitle());
@@ -188,26 +201,62 @@ public class MovieDetailActivity extends BaseActivity
     }
 
     // TODO: refactor
-    private int removeMovie() {
-        Uri uri = MoviesContract.MovieEntry.CONTENT_URI.buildUpon()
-                .appendPath(String.valueOf(mMovie.getId())).build();
-        return getContentResolver().delete(uri, null, null);
+    private void removeMovieFromFavourite() {
+        new AsyncTask<Void, Void, Integer>() {
+            @Override
+            protected Integer doInBackground(Void... voids) {
+                Uri uri = MoviesContract.MovieEntry.CONTENT_URI.buildUpon()
+                        .appendPath(String.valueOf(mMovie.getId())).build();
+                return getContentResolver().delete(uri, null, null);
+            }
+
+            @Override
+            protected void onPostExecute(Integer numberOfRemovedRows) {
+                super.onPostExecute(numberOfRemovedRows);
+                if (numberOfRemovedRows == 1) {
+                    Toast.makeText(MovieDetailActivity.this, "Movie was removed from favourite", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MovieDetailActivity.this, "Error occured", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }.execute();
     }
 
     private void isMovieFavourite() {
-       Uri uri = MoviesContract.MovieEntry.CONTENT_URI.buildUpon()
-               .appendPath(String.valueOf(mMovie.getId())).build();
-       Cursor cursor = getContentResolver().query(uri, null, null, null,
-               null);
-        if (cursor == null || cursor.getCount() == 0) {
-            mIsMovieFavourite = false;
-            mFavouriteMovieImageView.setImageResource(android.R.drawable.btn_star_big_off);
+        if (getSupportLoaderManager().getLoader(FAVOURITE_MOVIE_LOADER_ID) == null) {
+            getSupportLoaderManager().initLoader(FAVOURITE_MOVIE_LOADER_ID, null, mFavouriteMovieLoader);
         } else {
-            mIsMovieFavourite = true;
-            mFavouriteMovieImageView.setImageResource(android.R.drawable.btn_star_big_on);
-        }
-        if (cursor != null) {
-            cursor.close();
+            getSupportLoaderManager().restartLoader(FAVOURITE_MOVIE_LOADER_ID, null, mFavouriteMovieLoader);
         }
     }
+
+    private LoaderManager.LoaderCallbacks<Cursor> mFavouriteMovieLoader =
+            new LoaderManager.LoaderCallbacks<Cursor>() {
+                @NonNull
+                @Override
+                public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+                    Uri favouriteMovieUri = MoviesContract.MovieEntry.CONTENT_URI.buildUpon()
+                            .appendPath(String.valueOf(mMovie.getId())).build();
+                    return new FetchFavouriteMoviesLoader(MovieDetailActivity.this,
+                            favouriteMovieUri, false);
+                }
+
+                @Override
+                public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        mIsMovieFavourite = true;
+                    } else {
+                        mIsMovieFavourite = false;
+                    }
+                    setFavouriteButtonBackground(mIsMovieFavourite);
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+
+                @Override
+                public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+
+                }
+            };
 }

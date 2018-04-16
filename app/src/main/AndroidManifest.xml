@@ -21,7 +21,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".moviedetail.MovieDetailActivity" />
+        <activity android:name=".moviedetail.MovieDetailActivity"
+            android:parentActivityName=".moviedetail.MovieDetailActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".moviedetail.MovieDetailActivity" />
+        </activity>
         <activity android:name=".base.BaseActivity" />
         <provider
             android:authorities="ch.sheremet.katarina.movieapp"

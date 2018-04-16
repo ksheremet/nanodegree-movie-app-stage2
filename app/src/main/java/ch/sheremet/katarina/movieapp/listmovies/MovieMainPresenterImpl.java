@@ -27,7 +27,8 @@ public class MovieMainPresenterImpl implements IMovieMainPresenter {
         this.mApiManager = apiManager;
         mMoviesCallback = new Callback<MoviesResponse>() {
             @Override
-            public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
+            public void onResponse(final Call<MoviesResponse> call,
+                                   final Response<MoviesResponse> response) {
                 if (response.isSuccessful()) {
                     mView.showMovieData(response.body().getMovies());
                 } else {
@@ -52,10 +53,5 @@ public class MovieMainPresenterImpl implements IMovieMainPresenter {
     @Override
     public void getTopRatedMovies() {
         mApiManager.getTopRatedMovies(mMoviesCallback);
-    }
-
-    @Override
-    public void getFavouriteMovies() {
-
     }
 }

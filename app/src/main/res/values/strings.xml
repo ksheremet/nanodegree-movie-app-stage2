@@ -17,4 +17,5 @@
     <string name="favourite_movies_pref" translatable="false">favourite</string>
 
     <string name="close_review_detail">Close</string>
+    <string name="remove_from_favourite_user_message">Movie was removed from favourite</string>
 </resources>

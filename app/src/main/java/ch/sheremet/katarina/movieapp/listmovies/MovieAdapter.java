@@ -40,6 +40,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
                                  final int position) {
         Picasso.get()
                 .load(UriUtil.buildPosterUrl(mMovies.get(position).getPoster()))
+                .error(R.drawable.film_reel)
+                .placeholder(R.drawable.film_reel)
                 .into(holder.mMoviePoster);
     }
 

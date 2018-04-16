@@ -105,6 +105,7 @@ public class MovieMainActivity extends BaseActivity
     }
 
     private void showErrorMessage(String error) {
+        mLoadingMoviesIndicator.setVisibility(View.INVISIBLE);
         mMoviesRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMessage.setText(error);
         mErrorMessage.setVisibility(View.VISIBLE);

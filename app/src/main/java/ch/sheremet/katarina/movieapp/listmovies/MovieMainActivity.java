@@ -7,11 +7,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,6 +29,7 @@ import ch.sheremet.katarina.movieapp.di.DaggerMovieMainComponent;
 import ch.sheremet.katarina.movieapp.di.MovieMainComponent;
 import ch.sheremet.katarina.movieapp.di.MovieMainModule;
 import ch.sheremet.katarina.movieapp.favouritemovies.data.MoviesContract;
+import ch.sheremet.katarina.movieapp.favouritemovies.loaders.FetchFavouriteMoviesLoader;
 import ch.sheremet.katarina.movieapp.model.Movie;
 import ch.sheremet.katarina.movieapp.moviedetail.MovieDetailActivity;
 
@@ -164,7 +163,7 @@ public class MovieMainActivity extends BaseActivity
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
-        return new FavouriteMoviesLoader(this);
+        return new FetchFavouriteMoviesLoader(this, MoviesContract.MovieEntry.CONTENT_URI, true);
     }
 
     @Override
@@ -173,7 +172,7 @@ public class MovieMainActivity extends BaseActivity
             showErrorOccurredMessage();
             return;
         }
-        List<Movie> movieList = new ArrayList<>();
+        List<Movie> movieList = new ArrayList<>(cursor.getCount());
         while (cursor.moveToNext()) {
             Movie movie = new Movie();
             movie.setId(cursor.getInt(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_MOVIE_ID)));
@@ -196,47 +195,5 @@ public class MovieMainActivity extends BaseActivity
     @Override
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
 
-    }
-
-    public static class FavouriteMoviesLoader extends AsyncTaskLoader<Cursor> {
-        Cursor mFavouriteMovies = null;
-
-        FavouriteMoviesLoader(@NonNull Context context) {
-            super(context);
-        }
-
-        @Override
-        protected void onStartLoading() {
-            if (mFavouriteMovies != null) {
-                deliverResult(mFavouriteMovies);
-            } else {
-                forceLoad();
-            }
-        }
-
-        @Nullable
-        @Override
-        public Cursor loadInBackground() {
-            Cursor cursor;
-            try {
-                cursor = getContext()
-                        .getContentResolver().query(MoviesContract.MovieEntry.CONTENT_URI,
-                                null,
-                                null,
-                                null,
-                                MoviesContract.MovieEntry.COLUMN_RAITING + " DESC");
-
-                return cursor;
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to load data", e);
-                return null;
-            }
-        }
-
-        @Override
-        public void deliverResult(@Nullable Cursor data) {
-            mFavouriteMovies = data;
-            super.deliverResult(data);
-        }
     }
 }

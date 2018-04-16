@@ -14,6 +14,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -78,6 +79,7 @@ public class MovieDetailActivity extends BaseActivity
     private ReviewAdapter mReviewsAdapter;
     private Movie mMovie;
     private boolean mIsMovieFavourite;
+    private Uri mFirstTrailerUri = null;
     private LoaderManager.LoaderCallbacks<Cursor> mFavouriteMovieLoader =
             new LoaderManager.LoaderCallbacks<Cursor>() {
                 @NonNull
@@ -225,11 +227,26 @@ public class MovieDetailActivity extends BaseActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            NavUtils.navigateUpFromSameTask(this);
-            return true;
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+            case R.id.share_movie_menu:
+                Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                emailIntent.setType("text/plain");
+                if (mFirstTrailerUri != null) {
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_trailer,
+                            mMovie.getOriginalTitle(), mFirstTrailerUri));
+                } else {
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_name,
+                            mMovie.getOriginalTitle()));
+                }
+                startActivity(Intent.createChooser(emailIntent,
+                        getString(R.string.share_movie_chooser)));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -251,7 +268,16 @@ public class MovieDetailActivity extends BaseActivity
 
     @Override
     public void showTrailers(final List<Trailer> trailers) {
+        if (!trailers.isEmpty()) {
+            mFirstTrailerUri = Uri.parse(UriUtil.buildYoutubeVideoUrl(trailers.get(0).getKey()));
+        }
         mTrailersAdapter.setTrailers(trailers);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.movie_detail_menu, menu);
+        return true;
     }
 
     @OnClick(R.id.add_to_favourite_iv)

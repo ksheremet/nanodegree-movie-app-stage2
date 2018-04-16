@@ -20,4 +20,9 @@
 
     <string name="remove_from_favourite_user_message">Movie was removed from Favourite</string>
     <string name="movie_added_to_favourite_user_message">Movie was added to Favourite</string>
+
+    <string name="share_movie_menu">Share</string>
+    <string name="share_trailer">"%1$s. I like this movie. Check it out here: %2$s"</string>
+    <string name="share_name">"%1$s. I like this movie."</string>
+    <string name="share_movie_chooser">Select your favourite social media</string>
 </resources>

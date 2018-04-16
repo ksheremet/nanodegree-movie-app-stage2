@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -40,6 +42,7 @@ public class MovieMainActivity extends BaseActivity
 
     private static final String TAG = MovieMainActivity.class.getSimpleName();
     private static final int MOVIE_LOADER_ID = 123;
+    private static final String RECYCLER_VIEW_STATE = "recycler_view_state";
     @BindView(R.id.movie_rv)
     RecyclerView mMoviesRecyclerView;
     @BindView(R.id.error_message_tv)
@@ -76,6 +79,31 @@ public class MovieMainActivity extends BaseActivity
         String movie_pref = mMoviePref.getString(getString(R.string.movie_pref_key),
                 getString(R.string.popular_movies_pref));
         loadMoviesData(movie_pref);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(RECYCLER_VIEW_STATE, mMoviesRecyclerView
+                .getLayoutManager().onSaveInstanceState());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(final Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // Use delayed runnable.
+        // https://discussions.udacity.com/t/trouble-maintaining-recyclerview-position-upon-orientation-change/608216/12
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(savedInstanceState != null)
+                {
+                    Parcelable savedRecyclerLayoutState =
+                            savedInstanceState.getParcelable(RECYCLER_VIEW_STATE);
+                    mMoviesRecyclerView.getLayoutManager().onRestoreInstanceState(savedRecyclerLayoutState);
+                }
+            }
+        }, 400);
     }
 
     private void loadMoviesData(String movie_pref) {

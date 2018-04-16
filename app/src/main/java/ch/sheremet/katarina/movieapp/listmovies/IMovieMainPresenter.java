@@ -7,5 +7,4 @@ package ch.sheremet.katarina.movieapp.listmovies;
 public interface IMovieMainPresenter {
     void getPopularMovies();
     void getTopRatedMovies();
-    void getFavouriteMovies();
 }

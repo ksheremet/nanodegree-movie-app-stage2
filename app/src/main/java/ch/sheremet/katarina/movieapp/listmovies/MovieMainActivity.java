@@ -16,7 +16,6 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -28,6 +27,7 @@ import ch.sheremet.katarina.movieapp.base.BaseActivity;
 import ch.sheremet.katarina.movieapp.di.DaggerMovieMainComponent;
 import ch.sheremet.katarina.movieapp.di.MovieMainComponent;
 import ch.sheremet.katarina.movieapp.di.MovieMainModule;
+import ch.sheremet.katarina.movieapp.favouritemovies.data.FavouriteMoviesUtil;
 import ch.sheremet.katarina.movieapp.favouritemovies.data.MoviesContract;
 import ch.sheremet.katarina.movieapp.favouritemovies.loaders.FetchFavouriteMoviesLoader;
 import ch.sheremet.katarina.movieapp.model.Movie;
@@ -168,28 +168,16 @@ public class MovieMainActivity extends BaseActivity
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
-        if (cursor == null) {
+        List<Movie> movieList = FavouriteMoviesUtil.cursorToMovies(cursor);
+        if (movieList == null) {
             showErrorOccurredMessage();
             return;
-        }
-        List<Movie> movieList = new ArrayList<>(cursor.getCount());
-        while (cursor.moveToNext()) {
-            Movie movie = new Movie();
-            movie.setId(cursor.getInt(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_MOVIE_ID)));
-            movie.setOriginalTitle(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_TITLE)));
-            movie.setPlotSynopsis(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_PLOT_SYNOPSIS)));
-            movie.setUserRating(cursor.getDouble(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RAITING)));
-            movie.setReleaseDate(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE)));
-            movie.setPoster(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_POSTER_PATH)));
-
-            movieList.add(movie);
         }
         if (movieList.isEmpty()) {
             showErrorMessage(getString(R.string.no_favourite_movies_user_message));
         } else {
             showMovieData(movieList);
         }
-        cursor.close();
     }
 
     @Override

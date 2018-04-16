@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,6 +13,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -35,6 +35,7 @@ import ch.sheremet.katarina.movieapp.di.MovieDetailComponent;
 import ch.sheremet.katarina.movieapp.di.MovieDetailModule;
 import ch.sheremet.katarina.movieapp.favouritemovies.data.MoviesContract;
 import ch.sheremet.katarina.movieapp.favouritemovies.loaders.FetchFavouriteMoviesLoader;
+import ch.sheremet.katarina.movieapp.favouritemovies.loaders.RemoveFavouriteMoviesLoader;
 import ch.sheremet.katarina.movieapp.model.Movie;
 import ch.sheremet.katarina.movieapp.model.Review;
 import ch.sheremet.katarina.movieapp.model.Trailer;
@@ -50,6 +51,7 @@ public class MovieDetailActivity extends BaseActivity
     private static final String MOVIE_PARAM = "movie";
     private static final String REVIEW_FRAGMENT_TAG = "review_detail";
     private static final int FAVOURITE_MOVIE_LOADER_ID = 111;
+    private static final int REMOVE_FAVOURITE_MOVIE_LOADER_ID = 222;
 
     @BindView(R.id.detail_movie_poster_iv)
     ImageView mPosterIV;
@@ -113,7 +115,6 @@ public class MovieDetailActivity extends BaseActivity
         component.injectMovieDetailActivity(this);
         setTrailersView();
         setReviewsView();
-        mIsMovieFavourite = false;
         isMovieFavourite();
     }
 
@@ -200,26 +201,14 @@ public class MovieDetailActivity extends BaseActivity
         return getContentResolver().insert(MoviesContract.MovieEntry.CONTENT_URI, cv);
     }
 
-    // TODO: refactor
     private void removeMovieFromFavourite() {
-        new AsyncTask<Void, Void, Integer>() {
-            @Override
-            protected Integer doInBackground(Void... voids) {
-                Uri uri = MoviesContract.MovieEntry.CONTENT_URI.buildUpon()
-                        .appendPath(String.valueOf(mMovie.getId())).build();
-                return getContentResolver().delete(uri, null, null);
-            }
-
-            @Override
-            protected void onPostExecute(Integer numberOfRemovedRows) {
-                super.onPostExecute(numberOfRemovedRows);
-                if (numberOfRemovedRows == 1) {
-                    Toast.makeText(MovieDetailActivity.this, "Movie was removed from favourite", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MovieDetailActivity.this, "Error occured", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }.execute();
+        if (getSupportLoaderManager().getLoader(REMOVE_FAVOURITE_MOVIE_LOADER_ID) == null) {
+            getSupportLoaderManager()
+                    .initLoader(REMOVE_FAVOURITE_MOVIE_LOADER_ID, null, mRemoveMovieFromFavouriteLoader);
+        } else {
+            getSupportLoaderManager()
+                    .restartLoader(REMOVE_FAVOURITE_MOVIE_LOADER_ID, null, mRemoveMovieFromFavouriteLoader);
+        }
     }
 
     private void isMovieFavourite() {
@@ -243,11 +232,7 @@ public class MovieDetailActivity extends BaseActivity
 
                 @Override
                 public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
-                    if (cursor != null && cursor.moveToFirst()) {
-                        mIsMovieFavourite = true;
-                    } else {
-                        mIsMovieFavourite = false;
-                    }
+                    mIsMovieFavourite = cursor != null && cursor.moveToFirst();
                     setFavouriteButtonBackground(mIsMovieFavourite);
                     if (cursor != null) {
                         cursor.close();
@@ -256,6 +241,37 @@ public class MovieDetailActivity extends BaseActivity
 
                 @Override
                 public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+
+                }
+            };
+
+    private LoaderManager.LoaderCallbacks<Integer> mRemoveMovieFromFavouriteLoader =
+            new LoaderManager.LoaderCallbacks<Integer>() {
+                @NonNull
+                @Override
+                public Loader<Integer> onCreateLoader(int id, @Nullable Bundle args) {
+                    Uri favouriteMovieUri = MoviesContract.MovieEntry.CONTENT_URI.buildUpon()
+                            .appendPath(String.valueOf(mMovie.getId())).build();
+                    return new RemoveFavouriteMoviesLoader(MovieDetailActivity.this, favouriteMovieUri);
+                }
+
+                @Override
+                public void onLoadFinished(@NonNull Loader<Integer> loader, Integer numberOfRemovedRows) {
+                    if (numberOfRemovedRows == 1) {
+                        Toast.makeText(MovieDetailActivity.this,
+                                R.string.remove_from_favourite_user_message, Toast.LENGTH_SHORT)
+                                .show();
+                    } else {
+                        Toast.makeText(MovieDetailActivity.this,
+                                R.string.error_occurred_error_message, Toast.LENGTH_SHORT)
+                                .show();
+                        Log.e(TAG, "Movie wasn't removed from favourite");
+                    }
+
+                }
+
+                @Override
+                public void onLoaderReset(@NonNull Loader<Integer> loader) {
 
                 }
             };

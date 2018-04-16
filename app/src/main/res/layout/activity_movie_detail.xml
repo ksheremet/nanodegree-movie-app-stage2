@@ -70,7 +70,6 @@
             app:layout_constraintTop_toBottomOf="@+id/detail_rating_tv"
             tools:text="Release Date: 2014-09-10" />
 
-        <!-- TODO(ksheremer): Add error message and progress bar -->
         <android.support.v7.widget.RecyclerView
             android:id="@+id/trailers_rv"
             android:layout_width="match_parent"

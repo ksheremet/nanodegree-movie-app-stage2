@@ -184,9 +184,10 @@ public class MovieDetailActivity extends BaseActivity
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         setTitle(mMovie.getOriginalTitle());
-        // TODO: show default picture and on error.
         Picasso.get()
                 .load(UriUtil.buildPosterUrl(mMovie.getPoster()))
+                .error(R.drawable.film_reel)
+                .placeholder(R.drawable.film_reel)
                 .into(mPosterIV);
         mPosterIV.setContentDescription(mMovie.getPlotSynopsis());
         mTitleTV.setText(mMovie.getOriginalTitle());

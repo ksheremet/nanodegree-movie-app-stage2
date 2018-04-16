@@ -46,6 +46,8 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
     public void onBindViewHolder(@NonNull TrailerAdapterViewHolder holder, int position) {
         Picasso.get()
                 .load(UriUtil.buildYoutubeThumbnailUrl(mTrailers.get(position).getKey()))
+                .error(R.drawable.film_reel)
+                .placeholder(R.drawable.film_reel)
                 .into(holder.mTrailerPoster);
         holder.mTrailerName.setText(mTrailers.get(position).getName());
     }

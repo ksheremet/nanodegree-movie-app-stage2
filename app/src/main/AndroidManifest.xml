@@ -8,7 +8,6 @@
 
     <application
         android:allowBackup="true"
-        android:name=".MovieMainApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -28,7 +27,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".moviedetail.MovieDetailActivity" />
         </activity>
-        <activity android:name=".base.BaseActivity" />
+
         <provider
             android:authorities="ch.sheremet.katarina.movieapp"
             android:name=".favouritemovies.data.MovieContentProvider"

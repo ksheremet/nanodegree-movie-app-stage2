@@ -11,6 +11,7 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -31,7 +32,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ch.sheremet.katarina.movieapp.R;
-import ch.sheremet.katarina.movieapp.base.BaseActivity;
 import ch.sheremet.katarina.movieapp.di.DaggerMovieDetailComponent;
 import ch.sheremet.katarina.movieapp.di.MovieDetailComponent;
 import ch.sheremet.katarina.movieapp.di.MovieDetailModule;
@@ -46,7 +46,7 @@ import ch.sheremet.katarina.movieapp.model.Trailer;
 import ch.sheremet.katarina.movieapp.reviewdetail.ReviewDetailFragment;
 import ch.sheremet.katarina.movieapp.utilities.UriUtil;
 
-public class MovieDetailActivity extends BaseActivity
+public class MovieDetailActivity extends AppCompatActivity
         implements TrailerAdapter.TrailerAdapterOnClickHandler,
         ReviewAdapter.ReviewAdapterOnClickHandler,
         IMovieDetailView {
@@ -130,7 +130,6 @@ public class MovieDetailActivity extends BaseActivity
                                 .show();
                         Log.e(TAG, "Movie wasn't removed from favourite");
                     }
-
                 }
 
                 @Override
@@ -158,7 +157,6 @@ public class MovieDetailActivity extends BaseActivity
                         Toast.makeText(MovieDetailActivity.this,
                                 R.string.error_occurred_error_message, Toast.LENGTH_SHORT).show();
                     }
-
                 }
 
                 @Override
@@ -199,7 +197,9 @@ public class MovieDetailActivity extends BaseActivity
     private void setToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.collapsing_toolbar);
         collapsingToolbarLayout.setTitle(mMovie.getOriginalTitle());
         setTitle(mMovie.getOriginalTitle());

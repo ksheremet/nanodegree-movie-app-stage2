@@ -34,4 +34,21 @@
         <item name="android:layout_marginStart">@dimen/trailer_image_margin</item>
     </style>
 
+    <style name="ProgressBarStyle">
+        <item name="android:layout_width">@dimen/progress_bar_width</item>
+        <item name="android:layout_height">@dimen/progress_bar_height</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="MovieTitleStyle" parent="ItemMarginBordersStyle">
+        <item name="android:layout_marginTop">@dimen/items_indent</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Headline</item>
+    </style>
+
+    <style name="MovieSubTitleStyle">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/medium_text_size</item>
+    </style>
+
 </resources>

@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -37,7 +38,6 @@ import ch.sheremet.katarina.movieapp.di.MovieDetailComponent;
 import ch.sheremet.katarina.movieapp.di.MovieDetailModule;
 import ch.sheremet.katarina.movieapp.favouritemovies.data.FavouriteMoviesUtil;
 import ch.sheremet.katarina.movieapp.favouritemovies.data.MoviesContract;
-import ch.sheremet.katarina.movieapp.favouritemovies.loaders.FetchFavouriteMoviesLoader;
 import ch.sheremet.katarina.movieapp.favouritemovies.loaders.InsertFavouriteMoviesLoader;
 import ch.sheremet.katarina.movieapp.favouritemovies.loaders.RemoveFavouriteMoviesLoader;
 import ch.sheremet.katarina.movieapp.model.Movie;
@@ -88,8 +88,12 @@ public class MovieDetailActivity extends AppCompatActivity
                 public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
                     Uri favouriteMovieUri = MoviesContract.MovieEntry.CONTENT_URI.buildUpon()
                             .appendPath(String.valueOf(mMovie.getId())).build();
-                    return new FetchFavouriteMoviesLoader(MovieDetailActivity.this,
-                            favouriteMovieUri, false);
+                    return new CursorLoader(MovieDetailActivity.this,
+                            favouriteMovieUri,
+                            null,
+                            null,
+                            null,
+                            null);
                 }
 
                 @Override

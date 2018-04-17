@@ -11,6 +11,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -33,7 +34,6 @@ import ch.sheremet.katarina.movieapp.di.MovieMainComponent;
 import ch.sheremet.katarina.movieapp.di.MovieMainModule;
 import ch.sheremet.katarina.movieapp.favouritemovies.data.FavouriteMoviesUtil;
 import ch.sheremet.katarina.movieapp.favouritemovies.data.MoviesContract;
-import ch.sheremet.katarina.movieapp.favouritemovies.loaders.FetchFavouriteMoviesLoader;
 import ch.sheremet.katarina.movieapp.model.Movie;
 import ch.sheremet.katarina.movieapp.moviedetail.MovieDetailActivity;
 
@@ -200,7 +200,12 @@ public class MovieMainActivity extends AppCompatActivity
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
-        return new FetchFavouriteMoviesLoader(this, MoviesContract.MovieEntry.CONTENT_URI, true);
+        return new CursorLoader(MovieMainActivity.this,
+                MoviesContract.MovieEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                MoviesContract.MovieEntry.COLUMN_RATING + " DESC");
     }
 
     @Override

@@ -8,6 +8,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="DetailActivityTheme" parent="AppTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
     <style name="ItemMarginBordersStyle">
         <item name="android:layout_marginStart">@dimen/border_indent</item>
         <item name="android:layout_marginEnd">@dimen/border_indent</item>

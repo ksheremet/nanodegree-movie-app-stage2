@@ -3,6 +3,8 @@ package ch.sheremet.katarina.movieapp.listmovies;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -10,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
@@ -25,7 +28,6 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ch.sheremet.katarina.movieapp.R;
-import ch.sheremet.katarina.movieapp.base.BaseActivity;
 import ch.sheremet.katarina.movieapp.di.DaggerMovieMainComponent;
 import ch.sheremet.katarina.movieapp.di.MovieMainComponent;
 import ch.sheremet.katarina.movieapp.di.MovieMainModule;
@@ -35,12 +37,11 @@ import ch.sheremet.katarina.movieapp.favouritemovies.loaders.FetchFavouriteMovie
 import ch.sheremet.katarina.movieapp.model.Movie;
 import ch.sheremet.katarina.movieapp.moviedetail.MovieDetailActivity;
 
-public class MovieMainActivity extends BaseActivity
+public class MovieMainActivity extends AppCompatActivity
         implements MovieAdapter.MovieAdapterOnClickHandler,
         IMovieMainView,
         LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String TAG = MovieMainActivity.class.getSimpleName();
     private static final int MOVIE_LOADER_ID = 123;
     private static final String RECYCLER_VIEW_STATE = "recycler_view_state";
     @BindView(R.id.movie_rv)
@@ -49,10 +50,10 @@ public class MovieMainActivity extends BaseActivity
     TextView mErrorMessage;
     @BindView(R.id.loading_movies_pb)
     ProgressBar mLoadingMoviesIndicator;
-    private MovieAdapter mMovieAdapter;
-    private SharedPreferences mMoviePref;
     @Inject
     IMovieMainPresenter mPresenter;
+    private MovieAdapter mMovieAdapter;
+    private SharedPreferences mMoviePref;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -96,14 +97,21 @@ public class MovieMainActivity extends BaseActivity
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(savedInstanceState != null)
-                {
+                if (savedInstanceState != null) {
                     Parcelable savedRecyclerLayoutState =
                             savedInstanceState.getParcelable(RECYCLER_VIEW_STATE);
                     mMoviesRecyclerView.getLayoutManager().onRestoreInstanceState(savedRecyclerLayoutState);
                 }
             }
         }, 400);
+    }
+
+    private boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm == null) return false;
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     private void loadMoviesData(String movie_pref) {

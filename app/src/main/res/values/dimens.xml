@@ -7,4 +7,13 @@
     <dimen name="trailer_image_height">120dp</dimen>
     <dimen name="trailer_image_width">180dp</dimen>
     <dimen name="trailer_image_margin">4dp</dimen>
+
+    <!-- Progress Bar -->
+    <dimen name="progress_bar_height">50dp</dimen>
+    <dimen name="progress_bar_width">50dp</dimen>
+
+    <!-- TextSize -->
+    <dimen name="medium_text_size">18sp</dimen>
+    <dimen name="small_text_size">16sp</dimen>
+
 </resources>

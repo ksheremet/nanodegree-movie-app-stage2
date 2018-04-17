@@ -19,7 +19,7 @@ public class FavouriteMoviesUtil {
         cv.put(MoviesContract.MovieEntry.COLUMN_MOVIE_ID, movie.getId());
         cv.put(MoviesContract.MovieEntry.COLUMN_TITLE, movie.getOriginalTitle());
         cv.put(MoviesContract.MovieEntry.COLUMN_PLOT_SYNOPSIS, movie.getPlotSynopsis());
-        cv.put(MoviesContract.MovieEntry.COLUMN_RAITING, movie.getUserRating());
+        cv.put(MoviesContract.MovieEntry.COLUMN_RATING, movie.getUserRating());
         cv.put(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate());
         cv.put(MoviesContract.MovieEntry.COLUMN_POSTER_PATH, movie.getPoster());
         return cv;
@@ -35,7 +35,7 @@ public class FavouriteMoviesUtil {
             movie.setId(cursor.getInt(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_MOVIE_ID)));
             movie.setOriginalTitle(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_TITLE)));
             movie.setPlotSynopsis(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_PLOT_SYNOPSIS)));
-            movie.setUserRating(cursor.getDouble(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RAITING)));
+            movie.setUserRating(cursor.getDouble(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RATING)));
             movie.setReleaseDate(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE)));
             movie.setPoster(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_POSTER_PATH)));
 

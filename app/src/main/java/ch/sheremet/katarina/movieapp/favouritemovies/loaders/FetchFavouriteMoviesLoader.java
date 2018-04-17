@@ -40,7 +40,7 @@ public class FetchFavouriteMoviesLoader extends AsyncTaskLoader<Cursor> {
         Cursor cursor;
         String sortOrder;
         if (mSortByPopularity) {
-            sortOrder = MoviesContract.MovieEntry.COLUMN_RAITING + " DESC";
+            sortOrder = MoviesContract.MovieEntry.COLUMN_RATING + " DESC";
         } else {
             sortOrder = null;
         }

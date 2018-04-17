@@ -7,12 +7,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -181,11 +182,35 @@ public class MovieDetailActivity extends BaseActivity
         }
         ButterKnife.bind(this);
         mMovie = getIntent().getParcelableExtra(MOVIE_PARAM);
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+
+        setToolbar();
+        setMovieDetailsViews();
+
+        MovieDetailComponent component = DaggerMovieDetailComponent
+                .builder()
+                .movieDetailModule(new MovieDetailModule(this))
+                .build();
+        component.injectMovieDetailActivity(this);
+        setTrailersView();
+        setReviewsView();
+        isMovieFavourite();
+    }
+
+    private void setToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.collapsing_toolbar);
+        collapsingToolbarLayout.setTitle(mMovie.getOriginalTitle());
         setTitle(mMovie.getOriginalTitle());
+        Picasso.get()
+                .load(UriUtil.buildPosterUrl(mMovie.getPoster()))
+                .error(R.drawable.film_reel)
+                .placeholder(R.drawable.film_reel)
+                .into((ImageView) findViewById(R.id.app_bar_image));
+    }
+
+    private void setMovieDetailsViews() {
         Picasso.get()
                 .load(UriUtil.buildPosterUrl(mMovie.getPoster()))
                 .error(R.drawable.film_reel)
@@ -197,14 +222,6 @@ public class MovieDetailActivity extends BaseActivity
         mRatingTV.setText(getString(R.string.rating_detail_tv,
                 String.valueOf(mMovie.getUserRating())));
         mReleaseDateTV.setText(getString(R.string.release_detail_tv, mMovie.getReleaseDate()));
-        MovieDetailComponent component = DaggerMovieDetailComponent
-                .builder()
-                .movieDetailModule(new MovieDetailModule(this))
-                .build();
-        component.injectMovieDetailActivity(this);
-        setTrailersView();
-        setReviewsView();
-        isMovieFavourite();
     }
 
     private void setTrailersView() {
